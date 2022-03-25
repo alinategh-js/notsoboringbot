@@ -10,7 +10,7 @@ namespace NotSoBoring.Domain.Utils
             ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup(
                 new[]
                 {
-                    new KeyboardButton[] { StringUtils.Strings.ConnectMeToAnAnnonymous },
+                    new KeyboardButton[] { StringUtils.Strings.ConnectMeToAnAnonymous },
                     //new KeyboardButton[] { "2.1", "2.2" },
                 })
             {

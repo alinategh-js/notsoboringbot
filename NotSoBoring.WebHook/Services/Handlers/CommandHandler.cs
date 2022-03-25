@@ -10,13 +10,15 @@ namespace NotSoBoring.WebHook.Services.Handlers
     public class CommandHandler
     {
         private readonly MatchingEngine _matchingEngine;
+        private readonly ITelegramBotClient _botClient;
 
-        public CommandHandler(MatchingEngine matchingEngine)
+        public CommandHandler(MatchingEngine matchingEngine, ITelegramBotClient botClient)
         {
             _matchingEngine = matchingEngine;
+            _botClient = botClient;
         }
 
-        public async Task<Message> ConnectToAnonymous(ITelegramBotClient bot, Message message)
+        public async Task<Message> ConnectToAnonymous(Message message)
         {
             var userId = message.From.Id;
             if (_matchingEngine.IsUserInSession(userId))
@@ -33,12 +35,12 @@ namespace NotSoBoring.WebHook.Services.Handlers
                     "در غیر اینصورت میتوانید درخواست خود را با /cancel لغو کنید.";
             }
 
-            return await bot.SendTextMessageAsync(chatId: message.Chat.Id,
+            return await _botClient.SendTextMessageAsync(chatId: message.Chat.Id,
                                                       text: text,
                                                       replyToMessageId: message.MessageId);
         }
 
-        public async Task<Message> CancelRequest(ITelegramBotClient bot, Message message)
+        public async Task<Message> CancelRequest(Message message)
         {
             var userId = message.From.Id;
             if (_matchingEngine.IsUserInSession(userId))
@@ -55,13 +57,13 @@ namespace NotSoBoring.WebHook.Services.Handlers
                 text = "شما درخواست فعالی ندارید.";
             }
 
-            return await bot.SendTextMessageAsync(chatId: message.Chat.Id,
+            return await _botClient.SendTextMessageAsync(chatId: message.Chat.Id,
                                                       text: text,
                                                       replyToMessageId: message.MessageId,
                                                       replyMarkup: replyMarkup);
         }
 
-        public async Task<Message> CancelSession(ITelegramBotClient bot, Message message)
+        public async Task<Message> CancelSession(Message message)
         {
             var userId = message.From.Id;
             string firstText = "شما در حال حاضر چت فعال ندارید.";
@@ -73,17 +75,17 @@ namespace NotSoBoring.WebHook.Services.Handlers
 
                 var replyMarkup = ReplyMarkupFactory.GetDefaultKeyboardReplyMarkup();
 
-                await bot.SendTextMessageAsync(chatId: userId,
+                await _botClient.SendTextMessageAsync(chatId: userId,
                                                       text: firstText,
                                                       replyMarkup: replyMarkup);
 
-                return await bot.SendTextMessageAsync(chatId: secondUserId,
+                return await _botClient.SendTextMessageAsync(chatId: secondUserId,
                                                       text: secondText,
                                                       replyMarkup: replyMarkup);
             }
             else
             {
-                return await bot.SendTextMessageAsync(chatId: userId,
+                return await _botClient.SendTextMessageAsync(chatId: userId,
                                                       text: firstText);
             }
         }

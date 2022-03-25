@@ -11,6 +11,7 @@ using NotSoBoring.WebHook.Services;
 using NotSoBoring.WebHook.Services.Handlers;
 using System.Threading;
 using Telegram.Bot;
+using NotSoBoring.WebHook.Extensions;
 
 namespace NotSoBoring.WebHook
 {
@@ -30,18 +31,12 @@ namespace NotSoBoring.WebHook
         {
             services.AddHostedService<ConfigureWebhook>();
 
-            CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-            services.AddSingleton(cancellationTokenSource);
-
             services.AddHttpClient("tgwebhook")
                .AddTypedClient<ITelegramBotClient>(httpClient
                    => new TelegramBotClient(BotConfig.BotToken, httpClient));
 
-            services.AddScoped<HandleUpdateService>();
-            services.AddScoped<CommandHandler>();
-            services.AddScoped<SessionHandler>();
-            services.AddSingleton<UserService>();
-            services.AddSingleton<MatchingEngine>();
+            services.AddScopedServices();
+            services.AddSingletonServices();
 
             services.AddControllers()
                 .AddNewtonsoftJson();
