@@ -2,13 +2,15 @@
 using NotSoBoring.Matchmaking;
 using NotSoBoring.Matchmaking.Users;
 using NotSoBoring.WebHook.Services.Handlers;
-using NotSoBoring.WebHook.Services.Handlers.MessageTypeStrategies;
 using System;
 using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using NotSoBoring.WebHook.Services.Handlers.MessageHandlers.MessageTypeStrategies;
+using NotSoBoring.Domain.Enums;
+using NotSoBoring.WebHook.Services.Handlers.CallbackQueryHandlers;
 
 namespace NotSoBoring.WebHook.Services
 {
@@ -18,14 +20,17 @@ namespace NotSoBoring.WebHook.Services
         private readonly UserService _userService;
         private readonly MatchingEngine _matchingEngine;
         private readonly IServiceProvider _serviceProvider;
+        private readonly CallbackQueryHandler _callbackQueryHandler;
 
         public HandleUpdateService(ILogger<HandleUpdateService> logger,
-            UserService userService, MatchingEngine matchingEngine, IServiceProvider serviceProvider)
+            UserService userService, MatchingEngine matchingEngine, IServiceProvider serviceProvider,
+            CallbackQueryHandler callbackQueryHandler)
         {
             _logger = logger;
             _userService = userService;
             _matchingEngine = matchingEngine;
             _serviceProvider = serviceProvider;
+            _callbackQueryHandler = callbackQueryHandler;
         }
 
         public async Task EchoAsync(Update update)
@@ -33,6 +38,7 @@ namespace NotSoBoring.WebHook.Services
             Func<Task> handler = update.Type switch
             {
                 UpdateType.Message => async () => await BotOnMessageReceived(update.Message!),
+                UpdateType.CallbackQuery => async () => await BotOnCallbackQueryReceived(update.CallbackQuery),
                 _ => async () => await UnknownUpdateHandlerAsync(update)
             };
 
@@ -51,26 +57,37 @@ namespace NotSoBoring.WebHook.Services
             if (message.From == null)
                 return;
 
-            #region Check if user exists
-            var user = await _userService.GetUser(message.From.Id);
+            var userState = await CheckUser(message.From.Id);
+
+            Func<Task> action = MessageHandlerFactory.GetMessageHandler(message.Type).HandleMessage(message, userState, _serviceProvider);
+
+            await action.Invoke();
+        }
+
+        private async Task BotOnCallbackQueryReceived(CallbackQuery callbackQuery)
+        {
+            if (callbackQuery.From == null)
+                return;
+
+            var userState = await CheckUser(callbackQuery.From.Id);
+
+            Func<Task> action = _callbackQueryHandler.HandleCallbackQuery(callbackQuery);
+
+            await action.Invoke();
+        }
+
+        private async Task<UserState> CheckUser(long userId)
+        {
+            // check if user exists
+            var user = await _userService.GetUser(userId);
             if (user == null)
             {
                 // register user
-                await _userService.AddUser(message.From.Id);
+                await _userService.AddUser(userId);
             }
-            #endregion
 
-            #region Get User's state
-            var userState = _matchingEngine.GetUserState(message.From.Id);
-            #endregion
-
-            #region Determine action from user's state
-            Func<Task<Message>> action = MessageHandlerFactory.GetMessageHandler(message.Type).HandleMessage(message, userState, _serviceProvider);
-            #endregion
-
-            Message sentMessage = await action.Invoke();
-            _logger.LogInformation("The message was sent with id: {sentMessageId}", sentMessage.MessageId);
-
+            var userState = _matchingEngine.GetUserState(userId);
+            return userState;
         }
 
         private Task UnknownUpdateHandlerAsync(Update update)

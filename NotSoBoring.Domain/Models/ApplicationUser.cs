@@ -16,5 +16,7 @@ namespace NotSoBoring.Core.Models
         public int? Age { get; set; }
         [Display(Name = "جنسیت")]
         public GenderTypes? Gender { get; set; }
+        [Display(Name = "عکس")]
+        public string Photo { get; set; } // file_id of telegram servers
     }
 }

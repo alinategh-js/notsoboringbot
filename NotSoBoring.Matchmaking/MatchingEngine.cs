@@ -88,12 +88,13 @@ namespace NotSoBoring.Matchmaking
 
         private async Task Processor()
         {
+            MatchRequest[] requestsArray;
             while (!_cancellationToken.IsCancellationRequested)
             {
                 if (_matchRequests.Count >= 2 && _matchRequests.TryDequeue(out var firstRequest) && !firstRequest.IsCancelled)
                 {
                     // make an array from the requests queue so that it doesn't change until we are done processing firstRequest
-                    var requestsArray = _matchRequests.ToArray();
+                    requestsArray = _matchRequests.ToArray();
                     foreach (var request in requestsArray)
                     {
                         if (await IsMatched(request, firstRequest))
@@ -101,8 +102,8 @@ namespace NotSoBoring.Matchmaking
                             _matchedSessions.TryAdd(firstRequest.UserId, request.UserId);
                             _matchedSessions.TryAdd(request.UserId, firstRequest.UserId);
                             request.IsCancelled = true;
-                            await NotifyUsers(firstRequest.UserId, request.UserId);
-                            continue;
+                            _ = Task.Run(() => NotifyUsers(firstRequest.UserId, request.UserId));
+                            break;
                         }
                     }
                 }
@@ -129,11 +130,12 @@ namespace NotSoBoring.Matchmaking
 
         private async Task<bool> IsMatched(MatchRequest first, MatchRequest second)
         {
-            var firstUser = await _userService.GetUser(first.UserId);
-            var secondUser = await _userService.GetUser(second.UserId);
             // checking cancellation status
             if (first.IsCancelled || second.IsCancelled)
                 return false;
+
+            var firstUser = await _userService.GetUser(first.UserId);
+            var secondUser = await _userService.GetUser(second.UserId);
 
             // checking gender preferrence
             if ((first.PreferredGender != null && secondUser.Gender != first.PreferredGender) ||

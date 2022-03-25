@@ -1,9 +1,10 @@
 ﻿using NotSoBoring.WebHook.Services;
-using NotSoBoring.WebHook.Services.Handlers;
 using Microsoft.Extensions.DependencyInjection;
 using NotSoBoring.Matchmaking.Users;
 using NotSoBoring.Matchmaking;
 using System.Threading;
+using NotSoBoring.WebHook.Services.Handlers.MessageHandlers;
+using NotSoBoring.WebHook.Services.Handlers.CallbackQueryHandlers;
 
 namespace NotSoBoring.WebHook.Extensions
 {
@@ -15,6 +16,7 @@ namespace NotSoBoring.WebHook.Extensions
             services.AddScoped<CommandHandler>();
             services.AddScoped<SessionHandler>();
             services.AddScoped<GeneralHandler>();
+            services.AddScoped<CallbackQueryHandler>();
 
             return services;
         }

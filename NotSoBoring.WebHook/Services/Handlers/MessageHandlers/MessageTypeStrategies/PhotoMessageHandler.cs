@@ -4,13 +4,13 @@ using System.Threading.Tasks;
 using NotSoBoring.Domain.Enums;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace NotSoBoring.WebHook.Services.Handlers.MessageTypeStrategies
+namespace NotSoBoring.WebHook.Services.Handlers.MessageHandlers.MessageTypeStrategies
 {
     public class PhotoMessageHandler : IMessageHandlerStrategy
     {
-        public Func<Task<Message>> HandleMessage(Message message, UserState userState, IServiceProvider serviceProvider)
+        public Func<Task> HandleMessage(Message message, UserState userState, IServiceProvider serviceProvider)
         {
-            Func<Task<Message>> action = null;
+            Func<Task> action = null;
 
             if (userState == UserState.InSession)
             {

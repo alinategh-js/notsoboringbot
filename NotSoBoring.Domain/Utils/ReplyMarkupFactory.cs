@@ -10,8 +10,8 @@ namespace NotSoBoring.Domain.Utils
             ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup(
                 new[]
                 {
-                    new KeyboardButton[] { StringUtils.Strings.ConnectMeToAnAnonymous },
-                    //new KeyboardButton[] { "2.1", "2.2" },
+                    new KeyboardButton[] { StringUtils.Keyboard.ConnectMeToAnAnonymous },
+                    new KeyboardButton[] { StringUtils.Keyboard.Profile },
                 })
             {
                 ResizeKeyboard = true
@@ -25,7 +25,7 @@ namespace NotSoBoring.Domain.Utils
             ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup(
                 new[]
                 {
-                    new KeyboardButton[] { StringUtils.Strings.CancelSession },
+                    new KeyboardButton[] { StringUtils.Keyboard.CancelSession },
                 })
             {
                 ResizeKeyboard = true
@@ -34,29 +34,60 @@ namespace NotSoBoring.Domain.Utils
             return replyKeyboardMarkup;
         }
 
-        public static IReplyMarkup GetWaitingForMatchKeyboardReplyMarkup()
-        {
-            ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup(
-                new[]
-                {
-                    new KeyboardButton[] { StringUtils.Strings.CancelRequest },
-                })
-            {
-                ResizeKeyboard = true
-            };
+        //public static IReplyMarkup GetWaitingForMatchKeyboardReplyMarkup()
+        //{
+        //    ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup(
+        //        new[]
+        //        {
+        //            new KeyboardButton[] { StringUtils.Strings.CancelRequest },
+        //        })
+        //    {
+        //        ResizeKeyboard = true
+        //    };
 
-            return replyKeyboardMarkup;
-        }
+        //    return replyKeyboardMarkup;
+        //}
 
         public static IReplyMarkup GetUserReplyMarkup(UserState userState)
         {
             return userState switch
             {
                 UserState.InMenu => GetDefaultKeyboardReplyMarkup(),
-                UserState.WaitingForMatch => GetWaitingForMatchKeyboardReplyMarkup(),
+                UserState.WaitingForMatch => GetDefaultKeyboardReplyMarkup(),
                 UserState.InSession => GetInSessionKeyboardReplyMarkup(),
                 _ => GetDefaultKeyboardReplyMarkup()
             };
+        }
+
+        public static IReplyMarkup GetUserProfileInlineKeyboard()
+        {
+            InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup(
+                new[]
+                {
+                    new InlineKeyboardButton[] { StringUtils.InlineKeyboard.EditProfile }
+                });
+
+            return inlineKeyboardMarkup;
+        }
+
+        public static IReplyMarkup GetEditProfileInlineKeyboard()
+        {
+            InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup(
+                new[]
+                {
+                        new InlineKeyboardButton[]
+                        {
+                            StringUtils.InlineKeyboard.EditGender,
+                            StringUtils.InlineKeyboard.EditNickname
+                        },
+                        new InlineKeyboardButton[]
+                        {
+                            StringUtils.InlineKeyboard.EditProfilePhoto,
+                            StringUtils.InlineKeyboard.EditAge
+                        },
+                });
+
+            return inlineKeyboardMarkup;
         }
     }
 }

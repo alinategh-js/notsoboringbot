@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
-namespace NotSoBoring.WebHook.Services.Handlers
+namespace NotSoBoring.WebHook.Services.Handlers.MessageHandlers
 {
     public class GeneralHandler
     {

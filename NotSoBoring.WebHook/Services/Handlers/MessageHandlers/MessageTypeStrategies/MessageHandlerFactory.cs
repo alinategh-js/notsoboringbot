@@ -1,7 +1,7 @@
 ﻿using System;
 using Telegram.Bot.Types.Enums;
 
-namespace NotSoBoring.WebHook.Services.Handlers.MessageTypeStrategies
+namespace NotSoBoring.WebHook.Services.Handlers.MessageHandlers.MessageTypeStrategies
 {
     public static class MessageHandlerFactory
     {
@@ -12,6 +12,7 @@ namespace NotSoBoring.WebHook.Services.Handlers.MessageTypeStrategies
                 MessageType.Text => new TextMessageHandler(),
                 MessageType.Sticker => new StickerMessageHandler(),
                 MessageType.Voice => new VoiceMessageHandler(),
+                MessageType.Photo => new PhotoMessageHandler(),
                 _ => new NoActionMessageHandler()
             };
         }
