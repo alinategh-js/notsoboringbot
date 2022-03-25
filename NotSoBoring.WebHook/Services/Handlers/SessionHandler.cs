@@ -18,7 +18,7 @@ namespace NotSoBoring.WebHook.Services.Handlers
             _botClient = botClient;
         }
 
-        public async Task<Message> SendSessionTextMessage(Message message)
+        public async Task<Message> SendTextMessage(Message message)
         {
             var userId = message.From.Id;
             if(_matchingEngine.IsUserInSession(userId, out var secondUserId))
@@ -34,7 +34,7 @@ namespace NotSoBoring.WebHook.Services.Handlers
             return await Task.FromResult(message);
         }
 
-        public async Task<Message> SendSessionStickerMessage(Message message)
+        public async Task<Message> SendStickerMessage(Message message)
         {
             var userId = message.From.Id;
             if (_matchingEngine.IsUserInSession(userId, out var secondUserId))
@@ -50,7 +50,7 @@ namespace NotSoBoring.WebHook.Services.Handlers
             return await Task.FromResult(message);
         }
 
-        public async Task<Message> SendSessionVoicMessage(Message message)
+        public async Task<Message> SendVoicMessage(Message message)
         {
             var userId = message.From.Id;
             if (_matchingEngine.IsUserInSession(userId, out var secondUserId))
@@ -59,6 +59,22 @@ namespace NotSoBoring.WebHook.Services.Handlers
 
                 return await _botClient.SendVoiceAsync(chatId: secondUserId,
                                                       voice: message.Voice?.FileId,
+                                                      replyToMessageId: message.ReplyToMessage?.MessageId,
+                                                      replyMarkup: replyMarkup);
+            }
+
+            return await Task.FromResult(message);
+        }
+
+        public async Task<Message> SendPhotoMessage(Message message)
+        {
+            var userId = message.From.Id;
+            if (_matchingEngine.IsUserInSession(userId, out var secondUserId))
+            {
+                var replyMarkup = ReplyMarkupFactory.GetUserReplyMarkup(UserState.InSession);
+
+                return await _botClient.SendPhotoAsync(chatId: secondUserId,
+                                                      photo: message.Photo[0]?.FileId,
                                                       replyToMessageId: message.ReplyToMessage?.MessageId,
                                                       replyMarkup: replyMarkup);
             }

@@ -28,7 +28,7 @@ namespace NotSoBoring.WebHook.Services.Handlers.MessageTypeStrategies
                 action = message.Text! switch
                 {
                     StringUtils.Strings.CancelSession or "/endsession" => async () => await serviceProvider.GetRequiredService<CommandHandler>().CancelSession(message),
-                    _ => async () => await serviceProvider.GetRequiredService<SessionHandler>().SendSessionTextMessage(message)
+                    _ => async () => await serviceProvider.GetRequiredService<SessionHandler>().SendTextMessage(message)
                 };
             }
             else action = async () => await serviceProvider.GetRequiredService<GeneralHandler>().Usage(message);

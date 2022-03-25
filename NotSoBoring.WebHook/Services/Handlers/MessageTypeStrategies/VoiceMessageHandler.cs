@@ -14,7 +14,7 @@ namespace NotSoBoring.WebHook.Services.Handlers.MessageTypeStrategies
 
             if (userState == UserState.InSession)
             {
-                action = async () => await serviceProvider.GetRequiredService<SessionHandler>().SendSessionStickerMessage(message);
+                action = async () => await serviceProvider.GetRequiredService<SessionHandler>().SendVoicMessage(message);
             }
             else action = async () => await serviceProvider.GetRequiredService<GeneralHandler>().Usage(message);
 

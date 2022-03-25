@@ -1,12 +1,12 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using NotSoBoring.Domain.Enums;
-using System;
-using System.Threading.Tasks;
+﻿using System;
 using Telegram.Bot.Types;
+using System.Threading.Tasks;
+using NotSoBoring.Domain.Enums;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace NotSoBoring.WebHook.Services.Handlers.MessageTypeStrategies
 {
-    public class StickerMessageHandler : IMessageHandlerStrategy
+    public class PhotoMessageHandler : IMessageHandlerStrategy
     {
         public Func<Task<Message>> HandleMessage(Message message, UserState userState, IServiceProvider serviceProvider)
         {
@@ -14,7 +14,7 @@ namespace NotSoBoring.WebHook.Services.Handlers.MessageTypeStrategies
 
             if (userState == UserState.InSession)
             {
-                action = async () => await serviceProvider.GetRequiredService<SessionHandler>().SendStickerMessage(message);
+                action = async () => await serviceProvider.GetRequiredService<SessionHandler>().SendPhotoMessage(message);
             }
             else action = async () => await serviceProvider.GetRequiredService<GeneralHandler>().Usage(message);
 
