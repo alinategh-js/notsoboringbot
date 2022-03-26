@@ -34,6 +34,7 @@ namespace NotSoBoring.Matchmaking
                 return false;
 
             _matchRequests.Enqueue(request);
+            _userService.ChangeUserState(request.UserId, UserState.WaitingForMatch);
             return true;
         }
 
@@ -43,6 +44,7 @@ namespace NotSoBoring.Matchmaking
             if (request != null)
             {
                 request.IsCancelled = true;
+                _userService.ChangeUserState(userId, UserState.InMenu);
                 return true;
             }
 
@@ -51,8 +53,11 @@ namespace NotSoBoring.Matchmaking
 
         public bool TryCancelSession(long userId, out long secondUserId)
         {
-            if (_matchedSessions.TryRemove(userId, out secondUserId) && _matchedSessions.TryRemove(secondUserId, out long firstUserId))
+            if(_matchedSessions.TryRemove(userId, out secondUserId) && _matchedSessions.TryRemove(secondUserId, out long firstUserId))
+            {
+                _userService.ChangeUserState(userId, UserState.InSession);
                 return true;
+            }
 
             return false;
         }
@@ -60,7 +65,7 @@ namespace NotSoBoring.Matchmaking
         public bool IsUserInSession(long userId)
         {
             long secondUserId;
-            return _matchedSessions.TryGetValue(userId, out secondUserId) 
+            return _matchedSessions.TryGetValue(userId, out secondUserId)
                     && _matchedSessions.TryGetValue(secondUserId, out long firstUserId);
         }
 
@@ -73,17 +78,6 @@ namespace NotSoBoring.Matchmaking
         public bool IsUserWaitingForMatch(long userId)
         {
             return _matchRequests.Any(x => x.UserId == userId && !x.IsCancelled);
-        }
-
-        public UserState GetUserState(long userId)
-        {
-            if (IsUserInSession(userId))
-                return UserState.InSession;
-
-            if (IsUserWaitingForMatch(userId))
-                return UserState.WaitingForMatch;
-
-            else return UserState.InMenu;
         }
 
         private async Task Processor()
@@ -102,6 +96,8 @@ namespace NotSoBoring.Matchmaking
                             _matchedSessions.TryAdd(firstRequest.UserId, request.UserId);
                             _matchedSessions.TryAdd(request.UserId, firstRequest.UserId);
                             request.IsCancelled = true;
+                            _userService.ChangeUserState(firstRequest.UserId, UserState.InSession);
+                            _userService.ChangeUserState(request.UserId, UserState.InSession);
                             _ = Task.Run(() => NotifyUsers(firstRequest.UserId, request.UserId));
                             break;
                         }

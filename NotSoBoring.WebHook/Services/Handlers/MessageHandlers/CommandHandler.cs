@@ -8,6 +8,8 @@ using NotSoBoring.Matchmaking.Users;
 using Microsoft.Extensions.Configuration;
 using NotSoBoring.Domain.Extensions;
 using System.ComponentModel.DataAnnotations;
+using NotSoBoring.Domain.Enums;
+using System;
 
 namespace NotSoBoring.WebHook.Services.Handlers.MessageHandlers
 {
@@ -120,6 +122,52 @@ namespace NotSoBoring.WebHook.Services.Handlers.MessageHandlers
                                                 replyToMessageId: message.MessageId,
                                                 replyMarkup: replyMarkup);
             }
+        }
+
+        public async Task EditNickname(Message message)
+        {
+            var userId = message.From.Id;
+            var newNickname = message.Text;
+            await _userService.EditUserNickname(userId, newNickname);
+            _userService.ChangeUserState(userId, UserState.InMenu);
+
+            string text = $"نام مستعار شما با موفقیت به \"{newNickname}\" تغییر یافت ✔️";
+            await _botClient.SendTextMessageAsync(chatId: userId,
+                                                  text: text);
+        }
+
+        public async Task EditAge(Message message)
+        {
+            string text = "";
+            if (!Int32.TryParse(message.Text.Trim(), out int newAge) || newAge > 99 || newAge < 1)
+            {
+                text = "لطفا عددی بین 1 تا 99 وارد کنید (کاراکتر های انگلیسی)";
+                await _botClient.SendTextMessageAsync(chatId: message.From.Id,
+                                                  text: text);
+                return;
+            }
+
+            var userId = message.From.Id;
+            await _userService.EditAge(userId, newAge);
+            _userService.ChangeUserState(userId, UserState.InMenu);
+
+            text = $"سن شما با موفقیت به \"{newAge}\" تغییر یافت ✔️";
+            await _botClient.SendTextMessageAsync(chatId: userId,
+                                                  text: text);
+        }
+
+        public async Task EditProfilePhoto(Message message)
+        {
+            if (message.Photo == null)
+                return;
+
+            var userId = message.From.Id;
+            await _userService.EditPhoto(userId, message.Photo[0].FileId);
+            _userService.ChangeUserState(userId, UserState.InMenu);
+
+            string text = "عکس پروفایل شما با موفقیت تغییر یافت ✔️";
+            await _botClient.SendTextMessageAsync(chatId: userId,
+                                                  text: text);
         }
     }
 }

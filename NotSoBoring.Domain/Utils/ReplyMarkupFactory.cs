@@ -89,5 +89,20 @@ namespace NotSoBoring.Domain.Utils
 
             return inlineKeyboardMarkup;
         }
+
+        public static IReplyMarkup GetEditGenderInlineKeyboard()
+        {
+            InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup(
+                new[]
+                {
+                        new InlineKeyboardButton[]
+                        {
+                            StringUtils.InlineKeyboard.Male,
+                            StringUtils.InlineKeyboard.Female
+                        }
+                });
+
+            return inlineKeyboardMarkup;
+        }
     }
 }

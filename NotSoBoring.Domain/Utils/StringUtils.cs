@@ -21,6 +21,15 @@ namespace NotSoBoring.Domain.Utils
             public const string EditGender = "جنسیت 📝";
             public const string EditAge = "سن 📝";
             public const string EditProfilePhoto = "عکس 📝";
+
+            public const string Male = "پسر 👨";
+            public const string Female = "دختر 👩";
+        }
+
+        public static class Errors
+        {
+            public const string InvalidInput = "پیامی که فرستادی نامعتبره، دوباره تلاش کن ❌";
+            public const string CantEditProfileInSession = "امکان ویرایش پروفایل هنگام چت وجود ندارد ❌";
         }
     }
 }

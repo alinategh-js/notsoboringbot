@@ -32,6 +32,14 @@ namespace NotSoBoring.WebHook.Services.Handlers.MessageHandlers.MessageTypeStrat
                     _ => async () => await serviceProvider.GetRequiredService<SessionHandler>().SendTextMessage(message)
                 };
             }
+            else if (userState == UserState.EditingNickname)
+            {
+                action = async () => await serviceProvider.GetRequiredService<CommandHandler>().EditNickname(message);
+            }
+            else if (userState == UserState.EditingAge)
+            {
+                action = async () => await serviceProvider.GetRequiredService<CommandHandler>().EditAge(message);
+            }
             else action = async () => await serviceProvider.GetRequiredService<GeneralHandler>().Usage(message);
 
             return action;

@@ -18,17 +18,15 @@ namespace NotSoBoring.WebHook.Services
     {
         private readonly ILogger<HandleUpdateService> _logger;
         private readonly UserService _userService;
-        private readonly MatchingEngine _matchingEngine;
         private readonly IServiceProvider _serviceProvider;
         private readonly CallbackQueryHandler _callbackQueryHandler;
 
         public HandleUpdateService(ILogger<HandleUpdateService> logger,
-            UserService userService, MatchingEngine matchingEngine, IServiceProvider serviceProvider,
+            UserService userService, IServiceProvider serviceProvider,
             CallbackQueryHandler callbackQueryHandler)
         {
             _logger = logger;
             _userService = userService;
-            _matchingEngine = matchingEngine;
             _serviceProvider = serviceProvider;
             _callbackQueryHandler = callbackQueryHandler;
         }
@@ -71,7 +69,7 @@ namespace NotSoBoring.WebHook.Services
 
             var userState = await CheckUser(callbackQuery.From.Id);
 
-            Func<Task> action = _callbackQueryHandler.HandleCallbackQuery(callbackQuery);
+            Func<Task> action = _callbackQueryHandler.HandleCallbackQuery(callbackQuery, userState);
 
             await action.Invoke();
         }
@@ -86,7 +84,7 @@ namespace NotSoBoring.WebHook.Services
                 await _userService.AddUser(userId);
             }
 
-            var userState = _matchingEngine.GetUserState(userId);
+            var userState = _userService.GetUserState(userId);
             return userState;
         }
 

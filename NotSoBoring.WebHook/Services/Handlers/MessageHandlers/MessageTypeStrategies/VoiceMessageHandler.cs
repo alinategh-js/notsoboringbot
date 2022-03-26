@@ -16,6 +16,10 @@ namespace NotSoBoring.WebHook.Services.Handlers.MessageHandlers.MessageTypeStrat
             {
                 action = async () => await serviceProvider.GetRequiredService<SessionHandler>().SendVoiceMessage(message);
             }
+            else if(userState > UserState.Edit_Profile_Start && userState < UserState.Edit_Profile_End) // user is in edit mode
+            {
+                action = async () => await serviceProvider.GetRequiredService<GeneralHandler>().InvalidInput(message);
+            }
             else action = async () => await serviceProvider.GetRequiredService<GeneralHandler>().Usage(message);
 
             return action;

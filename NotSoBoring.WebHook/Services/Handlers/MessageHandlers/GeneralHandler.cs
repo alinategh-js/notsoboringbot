@@ -26,5 +26,14 @@ namespace NotSoBoring.WebHook.Services.Handlers.MessageHandlers
                                                   replyToMessageId: message.MessageId,
                                                   replyMarkup: replyMarkup);
         }
+
+        public async Task<Message> InvalidInput(Message message)
+        {
+            const string text = StringUtils.Errors.InvalidInput;
+
+            return await _botClient.SendTextMessageAsync(chatId: message.Chat.Id,
+                                                  text: text,
+                                                  replyToMessageId: message.MessageId);
+        }
     }
 }
