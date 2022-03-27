@@ -59,13 +59,21 @@ namespace NotSoBoring.Domain.Utils
             };
         }
 
-        public static IReplyMarkup GetUserProfileInlineKeyboard()
+        public static IReplyMarkup GetUserProfileInlineKeyboard(string uniqueId = null)
         {
-            InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup(
-                new[]
-                {
+            InlineKeyboardMarkup inlineKeyboardMarkup;
+            if (uniqueId == null)
+            {
+                inlineKeyboardMarkup = new InlineKeyboardMarkup(
+                     new[]
+                     {
                     new InlineKeyboardButton[] { StringUtils.InlineKeyboard.EditProfile }
-                });
+                     });
+            }
+            else
+            {
+                inlineKeyboardMarkup = null; 
+            }
 
             return inlineKeyboardMarkup;
         }
@@ -99,6 +107,40 @@ namespace NotSoBoring.Domain.Utils
                         {
                             StringUtils.InlineKeyboard.Male,
                             StringUtils.InlineKeyboard.Female
+                        }
+                });
+
+            return inlineKeyboardMarkup;
+        }
+
+        public static IReplyMarkup GetEndSessionInlineKeyboard()
+        {
+            InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup(
+                new[]
+                {
+                        new InlineKeyboardButton[]
+                        {
+                            StringUtils.InlineKeyboard.ContinueChat,
+                            StringUtils.InlineKeyboard.EndChat
+                        }
+                });
+
+            return inlineKeyboardMarkup;
+        }
+
+        public static IReplyMarkup GetChooseChatPreferrenceInlineKeyboard()
+        {
+            InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup(
+                new[]
+                {
+                        new InlineKeyboardButton[]
+                        {
+                            StringUtils.InlineKeyboard.DontCareGender
+                        },
+                        new InlineKeyboardButton[]
+                        {
+                            StringUtils.InlineKeyboard.OnlyMales,
+                            StringUtils.InlineKeyboard.OnlyFemales,
                         }
                 });
 

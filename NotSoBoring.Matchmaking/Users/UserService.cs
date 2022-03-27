@@ -8,6 +8,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace NotSoBoring.Matchmaking.Users
@@ -17,6 +18,7 @@ namespace NotSoBoring.Matchmaking.Users
         private readonly MainDbContext _mainDb;
         private ConcurrentDictionary<long, ApplicationUser> _users;
         private ConcurrentDictionary<long, UserState> _userStates;
+        private ConcurrentDictionary<long, DateTimeOffset> _usersRecentActivity;
         private readonly ILogger<UserService> _logger;
 
         public UserService(MainDbContext mainDb, ILogger<UserService> logger)
@@ -24,15 +26,27 @@ namespace NotSoBoring.Matchmaking.Users
             _mainDb = mainDb;
             _logger = logger;
             _userStates = new ConcurrentDictionary<long, UserState>();
+            _usersRecentActivity = new ConcurrentDictionary<long, DateTimeOffset>();
         }
 
         public async Task AddUser(long userId)
         {
             try
             {
+                StringBuilder builder = new StringBuilder();
+                Enumerable
+                   .Range(65, 26)
+                    .Select(e => ((char)e).ToString())
+                    .Concat(Enumerable.Range(97, 26).Select(e => ((char)e).ToString()))
+                    .Concat(Enumerable.Range(0, 10).Select(e => e.ToString()))
+                    .OrderBy(e => Guid.NewGuid())
+                    .Take(11)
+                    .ToList().ForEach(e => builder.Append(e));
+
                 var newUser = new ApplicationUser
                 {
                     Id = userId,
+                    UniqueId = builder.ToString()
                 };
 
                 _mainDb.Users.Add(newUser);
@@ -95,6 +109,14 @@ namespace NotSoBoring.Matchmaking.Users
             else return null; // user does not exist
         }
 
+        public async Task<ApplicationUser> GetUser(string uniqueId)
+        {
+            if (_users == null)
+                await FetchUsers();
+
+            return _users.FirstOrDefault(x => x.Value.UniqueId == uniqueId).Value;
+        }
+
         public UserState GetUserState(long userId)
         {
             UserState userState = UserState.InMenu;
@@ -111,6 +133,22 @@ namespace NotSoBoring.Matchmaking.Users
                 _userStates[userId] = userState;
 
             else _userStates.TryAdd(userId, userState);
+        }
+
+        public void UpdateUserRecentActivity(long userId)
+        {
+            if (_usersRecentActivity.TryGetValue(userId, out var dateTime))
+                _usersRecentActivity[userId] = DateTimeOffset.Now;
+
+            else _usersRecentActivity.TryAdd(userId, DateTimeOffset.Now);
+        }
+
+        public DateTimeOffset? GetUserRecentActivity(long userId)
+        {
+            if (_usersRecentActivity.TryGetValue(userId, out var dateTime))
+                return dateTime;
+
+            else return null;
         }
 
         private async Task FetchUsers()

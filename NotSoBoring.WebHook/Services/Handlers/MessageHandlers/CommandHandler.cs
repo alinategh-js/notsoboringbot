@@ -10,6 +10,7 @@ using NotSoBoring.Domain.Extensions;
 using System.ComponentModel.DataAnnotations;
 using NotSoBoring.Domain.Enums;
 using System;
+using NotSoBoring.Core.Models;
 
 namespace NotSoBoring.WebHook.Services.Handlers.MessageHandlers
 {
@@ -35,20 +36,13 @@ namespace NotSoBoring.WebHook.Services.Handlers.MessageHandlers
             if (_matchingEngine.IsUserInSession(userId))
                 return;
 
-            string text = "";
-            if (_matchingEngine.TryAddRequest(new MatchRequest { UserId = userId }))
-            {
-                text = "منتظر باش تا به یکی وصلت کنم 🕐 ";
-            }
-            else
-            {
-                text = "شما کمی پیش درخواست دادید، لطفا کمی صبر کنید تا به یک نفر متصل شوید.\n\n" +
-                    "در غیر اینصورت میتوانید درخواست خود را با /cancel لغو کنید.";
-            }
+            string text = "دوست داری به چه کسی وصلت کنم؟";
+            var replyMarkup = ReplyMarkupFactory.GetChooseChatPreferrenceInlineKeyboard();
 
-            await _botClient.SendTextMessageAsync(chatId: message.Chat.Id,
-                                                      text: text,
-                                                      replyToMessageId: message.MessageId);
+            await _botClient.SendTextMessageAsync(chatId: userId,
+                                                  text: text,
+                                                  replyMarkup: replyMarkup,
+                                                  replyToMessageId: message.MessageId);
         }
 
         public async Task CancelRequest(Message message)
@@ -77,44 +71,51 @@ namespace NotSoBoring.WebHook.Services.Handlers.MessageHandlers
         public async Task CancelSession(Message message)
         {
             var userId = message.From.Id;
-            string firstText = "شما در حال حاضر چت فعال ندارید.";
-            string secondText = "";
-            if (_matchingEngine.TryCancelSession(userId, out long secondUserId))
+            string text = "شما در حال حاضر چت فعال ندارید.";
+            if (_matchingEngine.IsUserInSession(userId))
             {
-                firstText = "چت با مخاطب توسط شما قطع شد.";
-                secondText = "چت توسط مخاطب شما قطع شد.";
+                text = "مطمئنی که میخوای چت رو تموم کنی؟ ❔";
 
-                var replyMarkup = ReplyMarkupFactory.GetDefaultKeyboardReplyMarkup();
+                var replyMarkup = ReplyMarkupFactory.GetEndSessionInlineKeyboard();
 
                 await _botClient.SendTextMessageAsync(chatId: userId,
-                                                      text: firstText,
-                                                      replyMarkup: replyMarkup);
-
-                await _botClient.SendTextMessageAsync(chatId: secondUserId,
-                                                      text: secondText,
-                                                      replyMarkup: replyMarkup);
+                                                      text: text,
+                                                      replyMarkup: replyMarkup,
+                                                      replyToMessageId: message.MessageId);
             }
             else
             {
                 await _botClient.SendTextMessageAsync(chatId: userId,
-                                                      text: firstText);
+                                                      text: text);
             }
         }
 
-        public async Task ShowProfile(Message message, long? anotherUserId = null)
+        public async Task ShowProfile(Message message, string anotherUniqueId = null)
         {
             var userId = message.From.Id;
             var user = await _userService.GetUser(userId);
-            if (user != null)
+            ApplicationUser targetUser;
+            if (anotherUniqueId == null)
+                targetUser = user;
+            else
+                targetUser = await _userService.GetUser(anotherUniqueId);
+
+            if (targetUser != null)
             {
-                var replyMarkup = ReplyMarkupFactory.GetUserProfileInlineKeyboard();
-                string nickname = user.Nickname ?? "❌";
-                string age = user.Age?.ToString() ?? "❌";
-                string gender = user.Gender != null ? user.Gender.GetAttribute<DisplayAttribute>()?.Name : "❌";
-                string photo = user.Photo ?? _configuration["BotImages:DefaultProfileImage"];
+                var replyMarkup = ReplyMarkupFactory.GetUserProfileInlineKeyboard(anotherUniqueId == user.UniqueId ? null : anotherUniqueId);
+                string nickname = targetUser.Nickname ?? "❌";
+                string age = targetUser.Age?.ToString() ?? "❌";
+                string gender = targetUser.Gender != null ? targetUser.Gender.GetAttribute<DisplayAttribute>()?.Name : "❌";
+                string photo = targetUser.Photo ?? _configuration["BotImages:DefaultProfileImage"];
+                string uniqueId = targetUser.UniqueId;
+                var lastActivity = _userService.GetUserRecentActivity(targetUser.Id);
+                var isInSession = _matchingEngine.IsUserInSession(targetUser.Id);
+                string onlineStatus = StringUtils.GetUserOnlineStatus(lastActivity, isInSession);
                 string caption = $"نام مستعار: {nickname}\n"
                                  + $"جنسیت: {gender}\n"
-                                 + $"سن: {age}\n";
+                                 + $"سن: {age}\n\n"
+                                 + $"وضعیت: {onlineStatus}\n\n"
+                                 + $"🆔: /user_{uniqueId}";
 
                 await _botClient.SendPhotoAsync(chatId: userId,
                                                 photo: photo,

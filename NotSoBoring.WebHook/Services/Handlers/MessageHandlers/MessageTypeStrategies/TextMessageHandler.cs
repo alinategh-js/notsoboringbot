@@ -21,6 +21,7 @@ namespace NotSoBoring.WebHook.Services.Handlers.MessageHandlers.MessageTypeStrat
                     StringUtils.Keyboard.CancelRequest or "/cancel" => async () => await serviceProvider.GetRequiredService<CommandHandler>().CancelRequest(message),
                     StringUtils.Keyboard.CancelSession or "/endsession" => async () => await serviceProvider.GetRequiredService<CommandHandler>().CancelSession(message),
                     StringUtils.Keyboard.Profile or "/profile" => async () => await serviceProvider.GetRequiredService<CommandHandler>().ShowProfile(message),
+                    string command when command.StartsWith("/user_") => async () => await serviceProvider.GetRequiredService<CommandHandler>().ShowProfile(message, command.Substring(6)),
                     _ => async () => await serviceProvider.GetRequiredService<GeneralHandler>().Usage(message)
                 };
             }

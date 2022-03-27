@@ -102,6 +102,9 @@ namespace NotSoBoring.Matchmaking
                             break;
                         }
                     }
+
+                    // didn't find a match, enqueue the firstRequest
+                    _matchRequests.Enqueue(firstRequest);
                 }
                 else
                 {

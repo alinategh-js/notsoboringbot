@@ -84,6 +84,9 @@ namespace NotSoBoring.WebHook.Services
                 await _userService.AddUser(userId);
             }
 
+            // update user recent activity
+            _userService.UpdateUserRecentActivity(userId);
+
             var userState = _userService.GetUserState(userId);
             return userState;
         }

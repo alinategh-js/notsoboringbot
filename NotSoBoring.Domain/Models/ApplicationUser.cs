@@ -10,6 +10,8 @@ namespace NotSoBoring.Core.Models
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public long Id { get; set; }
 
+        public string UniqueId { get; set; }
+
         [Display(Name = "نام مستعار")]
         public string Nickname { get; set; }
         [Display(Name = "سن")]

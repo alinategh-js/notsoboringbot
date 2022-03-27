@@ -6,6 +6,7 @@ namespace NotSoBoring.Domain.Utils
 {
     public static class StringUtils
     {
+        private static TimeSpan OnlineTimeSpan = TimeSpan.FromMinutes(2);
         public static class Keyboard
         {
             public const string ConnectMeToAnAnonymous = "به یه ناشناس وصلم کن! 🎲";
@@ -24,12 +25,47 @@ namespace NotSoBoring.Domain.Utils
 
             public const string Male = "پسر 👨";
             public const string Female = "دختر 👩";
+
+            public const string EndChat = "اتمام چت ❌";
+            public const string ContinueChat = "ادامه چت ✔️";
+
+            public const string OnlyMales = "فقط پسر 👨";
+            public const string OnlyFemales = "فقط دختر 👩";
+            public const string DontCareGender = "فرقی نداره 🎲";
         }
 
         public static class Errors
         {
             public const string InvalidInput = "پیامی که فرستادی نامعتبره، دوباره تلاش کن ❌";
             public const string CantEditProfileInSession = "امکان ویرایش پروفایل هنگام چت وجود ندارد ❌";
+        }
+
+        public static string GetUserOnlineStatus(DateTimeOffset? lastActivity, bool isInSession)
+        {
+            var currentTime = DateTimeOffset.Now;
+            string status = "";
+            var timeSpan = currentTime - lastActivity;
+            if (timeSpan < OnlineTimeSpan && lastActivity.HasValue)
+                status = "آنلاین ✔️";
+            else 
+            { 
+                if (timeSpan == null)
+                {
+                    status = "آفلاین ❌";
+                }
+                else
+                {
+                    string timeSpanString = timeSpan.Value.ToReadableString();
+                    status = $"({timeSpanString} پیش آنلاین بوده)";
+                }
+            }
+
+            if (isInSession)
+            {
+                status = status + " (در حال چت کردن 🗣)";
+            }
+
+            return status;
         }
     }
 }

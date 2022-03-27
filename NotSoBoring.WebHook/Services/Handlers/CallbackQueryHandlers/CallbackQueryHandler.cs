@@ -9,6 +9,8 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 using NotSoBoring.Domain.Extensions;
 using System.ComponentModel.DataAnnotations;
+using NotSoBoring.Matchmaking;
+using NotSoBoring.Domain.DTOs;
 
 namespace NotSoBoring.WebHook.Services.Handlers.CallbackQueryHandlers
 {
@@ -16,11 +18,13 @@ namespace NotSoBoring.WebHook.Services.Handlers.CallbackQueryHandlers
     {
         private readonly ITelegramBotClient _botClient;
         private readonly UserService _userService;
+        private readonly MatchingEngine _matchingEngine;
 
-        public CallbackQueryHandler(ITelegramBotClient botClient, UserService userService)
+        public CallbackQueryHandler(ITelegramBotClient botClient, UserService userService, MatchingEngine matchingEngine)
         {
             _botClient = botClient;
             _userService = userService;
+            _matchingEngine = matchingEngine;
         }
 
         public Func<Task> HandleCallbackQuery(CallbackQuery callbackQuery, UserState userState)
@@ -37,12 +41,25 @@ namespace NotSoBoring.WebHook.Services.Handlers.CallbackQueryHandlers
                     StringUtils.InlineKeyboard.EditGender => async () => await EditGender(callbackQuery),
                     StringUtils.InlineKeyboard.Male => async () => await ChangeGender(callbackQuery, GenderTypes.Male),
                     StringUtils.InlineKeyboard.Female => async () => await ChangeGender(callbackQuery, GenderTypes.Female),
+                    StringUtils.InlineKeyboard.DontCareGender => async () => await ConnectToAnonymous(callbackQuery),
+                    StringUtils.InlineKeyboard.OnlyMales => async () => await ConnectToAnonymous(callbackQuery, GenderTypes.Male),
+                    StringUtils.InlineKeyboard.OnlyFemales => async () => await ConnectToAnonymous(callbackQuery, GenderTypes.Female),
                     _ => () => Task.CompletedTask
                 };
             }
-            else
+            else // in session
             {
-                action = async () => await CantEditProfile(callbackQuery);
+                action = callbackQuery.Data switch
+                {
+                    StringUtils.InlineKeyboard.EndChat => async () => await EndSession(callbackQuery),
+                    StringUtils.InlineKeyboard.ContinueChat => async () => await ContinueSession(callbackQuery),
+                    StringUtils.InlineKeyboard.EditProfile or
+                    StringUtils.InlineKeyboard.EditNickname or
+                    StringUtils.InlineKeyboard.EditAge or
+                    StringUtils.InlineKeyboard.EditGender or
+                    StringUtils.InlineKeyboard.EditProfilePhoto => async () => await CantEditProfile(callbackQuery),
+                    _ => () => Task.CompletedTask
+                };
             }
 
             return action;
@@ -118,6 +135,53 @@ namespace NotSoBoring.WebHook.Services.Handlers.CallbackQueryHandlers
             await _botClient.AnswerCallbackQueryAsync(callbackQueryId: callbackQuery.Id,
                                                       text: text,
                                                       showAlert: true);
+        }
+
+        private async Task EndSession(CallbackQuery callbackQuery)
+        {
+            var userId = callbackQuery.From.Id;
+            if (_matchingEngine.TryCancelSession(userId, out long secondUserId))
+            {
+                string firstText = "چت با مخاطب توسط شما قطع شد.";
+                string secondText = "چت توسط مخاطب شما قطع شد.";
+
+                var replyMarkup = ReplyMarkupFactory.GetDefaultKeyboardReplyMarkup();
+
+                await _botClient.SendTextMessageAsync(chatId: userId,
+                                                      text: firstText,
+                                                      replyMarkup: replyMarkup);
+
+                await _botClient.SendTextMessageAsync(chatId: secondUserId,
+                                                      text: secondText,
+                                                      replyMarkup: replyMarkup);
+            }
+        }
+
+        private async Task ContinueSession(CallbackQuery callbackQuery)
+        {
+            await _botClient.DeleteMessageAsync(chatId: callbackQuery.From.Id,
+                                                messageId: callbackQuery.Message.MessageId);
+        }
+
+        private async Task ConnectToAnonymous(CallbackQuery callbackQuery, GenderTypes? genderPreferrence = null)
+        {
+            var userId = callbackQuery.From.Id;
+            if (_matchingEngine.IsUserInSession(userId))
+                return;
+
+            string text = "";
+            if (_matchingEngine.TryAddRequest(new MatchRequest { UserId = userId, PreferredGender = genderPreferrence }))
+            {
+                text = "منتظر باش تا به یکی وصلت کنم 🕐 ";
+            }
+            else
+            {
+                text = "شما کمی پیش درخواست دادید، لطفا کمی صبر کنید تا به یک نفر متصل شوید.\n\n" +
+                    "در غیر اینصورت میتوانید درخواست خود را با /cancel لغو کنید.";
+            }
+            await _botClient.DeleteMessageAsync(chatId: userId, messageId: callbackQuery.Message.MessageId);
+            await _botClient.SendTextMessageAsync(chatId: userId,
+                                                      text: text);
         }
     }
 }
