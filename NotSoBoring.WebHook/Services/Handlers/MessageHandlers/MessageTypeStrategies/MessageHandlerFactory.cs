@@ -13,6 +13,7 @@ namespace NotSoBoring.WebHook.Services.Handlers.MessageHandlers.MessageTypeStrat
                 MessageType.Sticker => new StickerMessageHandler(),
                 MessageType.Voice => new VoiceMessageHandler(),
                 MessageType.Photo => new PhotoMessageHandler(),
+                MessageType.Location => new LocationMessageHandler(),
                 _ => new NoActionMessageHandler()
             };
         }

@@ -23,12 +23,9 @@ namespace NotSoBoring.WebHook.Services.Handlers.MessageHandlers
             var userId = message.From.Id;
             if(_matchingEngine.IsUserInSession(userId, out var secondUserId))
             {
-                var replyMarkup = ReplyMarkupFactory.GetUserReplyMarkup(UserState.InSession);
-
                 await _botClient.SendTextMessageAsync(chatId: secondUserId,
                                                       text: message.Text,
-                                                      replyToMessageId: message.ReplyToMessage?.MessageId,
-                                                      replyMarkup: replyMarkup);
+                                                      replyToMessageId: message.ReplyToMessage?.MessageId);
             }
         }
 
@@ -37,12 +34,9 @@ namespace NotSoBoring.WebHook.Services.Handlers.MessageHandlers
             var userId = message.From.Id;
             if (_matchingEngine.IsUserInSession(userId, out var secondUserId))
             {
-                var replyMarkup = ReplyMarkupFactory.GetUserReplyMarkup(UserState.InSession);
-
                 await _botClient.SendStickerAsync(chatId: secondUserId,
                                                       sticker: message.Sticker?.FileId,
-                                                      replyToMessageId: message.ReplyToMessage?.MessageId,
-                                                      replyMarkup: replyMarkup);
+                                                      replyToMessageId: message.ReplyToMessage?.MessageId);
             }
         }
 
@@ -51,12 +45,9 @@ namespace NotSoBoring.WebHook.Services.Handlers.MessageHandlers
             var userId = message.From.Id;
             if (_matchingEngine.IsUserInSession(userId, out var secondUserId))
             {
-                var replyMarkup = ReplyMarkupFactory.GetUserReplyMarkup(UserState.InSession);
-
                 await _botClient.SendVoiceAsync(chatId: secondUserId,
                                                       voice: message.Voice?.FileId,
-                                                      replyToMessageId: message.ReplyToMessage?.MessageId,
-                                                      replyMarkup: replyMarkup);
+                                                      replyToMessageId: message.ReplyToMessage?.MessageId);
             }
         }
 
@@ -65,12 +56,21 @@ namespace NotSoBoring.WebHook.Services.Handlers.MessageHandlers
             var userId = message.From.Id;
             if (_matchingEngine.IsUserInSession(userId, out var secondUserId))
             {
-                var replyMarkup = ReplyMarkupFactory.GetUserReplyMarkup(UserState.InSession);
-
                 await _botClient.SendPhotoAsync(chatId: secondUserId,
                                                       photo: message.Photo[0]?.FileId,
-                                                      replyToMessageId: message.ReplyToMessage?.MessageId,
-                                                      replyMarkup: replyMarkup);
+                                                      replyToMessageId: message.ReplyToMessage?.MessageId);
+            }
+        }
+
+        public async Task SendLocationMessage(Message message)
+        {
+            var userId = message.From.Id;
+            if (_matchingEngine.IsUserInSession(userId, out var secondUserId))
+            {
+                await _botClient.SendLocationAsync(chatId: secondUserId,
+                                                      latitude: message.Location.Latitude,
+                                                      longitude: message.Location.Longitude,
+                                                      replyToMessageId: message.ReplyToMessage?.MessageId);
             }
         }
     }

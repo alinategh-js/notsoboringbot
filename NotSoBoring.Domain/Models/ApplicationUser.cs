@@ -20,5 +20,8 @@ namespace NotSoBoring.Core.Models
         public GenderTypes? Gender { get; set; }
         [Display(Name = "عکس")]
         public string Photo { get; set; } // file_id of telegram servers
+
+        public double? Latitude { get; set; }
+        public double? Longitude { get; set; }
     }
 }

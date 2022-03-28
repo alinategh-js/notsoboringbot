@@ -39,6 +39,7 @@ namespace NotSoBoring.WebHook.Services.Handlers.CallbackQueryHandlers
                     StringUtils.InlineKeyboard.EditAge => async () => await EditAge(callbackQuery),
                     StringUtils.InlineKeyboard.EditProfilePhoto => async () => await EditProfilePhoto(callbackQuery),
                     StringUtils.InlineKeyboard.EditGender => async () => await EditGender(callbackQuery),
+                    StringUtils.InlineKeyboard.EditLocation => async () => await EditLocation(callbackQuery),
                     StringUtils.InlineKeyboard.Male => async () => await ChangeGender(callbackQuery, GenderTypes.Male),
                     StringUtils.InlineKeyboard.Female => async () => await ChangeGender(callbackQuery, GenderTypes.Female),
                     StringUtils.InlineKeyboard.DontCareGender => async () => await ConnectToAnonymous(callbackQuery),
@@ -79,9 +80,11 @@ namespace NotSoBoring.WebHook.Services.Handlers.CallbackQueryHandlers
             _userService.ChangeUserState(callbackQuery.From.Id, UserState.EditingNickname);
             string text = "لطفا نام مستعار خود را وارد کنید 👇";
 
+            var replyMarkup = ReplyMarkupFactory.GetEditProfileKeyboard();
             await _botClient.DeleteMessageAsync(chatId: callbackQuery.From.Id, messageId: callbackQuery.Message.MessageId);
             await _botClient.SendTextMessageAsync(chatId: callbackQuery.From.Id,
-                                                  text: text);
+                                                  text: text,
+                                                  replyMarkup: replyMarkup);
         }
 
         private async Task EditAge(CallbackQuery callbackQuery)
@@ -89,9 +92,11 @@ namespace NotSoBoring.WebHook.Services.Handlers.CallbackQueryHandlers
             _userService.ChangeUserState(callbackQuery.From.Id, UserState.EditingAge);
             string text = "لطفا سن خود را وارد کنید 👇";
 
+            var replyMarkup = ReplyMarkupFactory.GetEditProfileKeyboard();
             await _botClient.DeleteMessageAsync(chatId: callbackQuery.From.Id, messageId: callbackQuery.Message.MessageId);
             await _botClient.SendTextMessageAsync(chatId: callbackQuery.From.Id,
-                                                  text: text);
+                                                  text: text,
+                                                  replyMarkup: replyMarkup);
         }
 
         private async Task EditProfilePhoto(CallbackQuery callbackQuery)
@@ -99,9 +104,11 @@ namespace NotSoBoring.WebHook.Services.Handlers.CallbackQueryHandlers
             _userService.ChangeUserState(callbackQuery.From.Id, UserState.EditingPhoto);
             string text = "لطفا عکس خود را آپلود کنید 👇";
 
+            var replyMarkup = ReplyMarkupFactory.GetEditProfileKeyboard();
             await _botClient.DeleteMessageAsync(chatId: callbackQuery.From.Id, messageId: callbackQuery.Message.MessageId);
             await _botClient.SendTextMessageAsync(chatId: callbackQuery.From.Id,
-                                                  text: text);
+                                                  text: text,
+                                                  replyMarkup: replyMarkup);
         }
 
         private async Task EditGender(CallbackQuery callbackQuery)
@@ -115,6 +122,24 @@ namespace NotSoBoring.WebHook.Services.Handlers.CallbackQueryHandlers
             await _botClient.SendTextMessageAsync(chatId: callbackQuery.From.Id,
                                                   text: text,
                                                   replyMarkup: replyMarkup);
+
+            var replyMarkupKeyboard = ReplyMarkupFactory.GetEditProfileKeyboard();
+            await _botClient.SendTextMessageAsync(chatId: callbackQuery.From.Id,
+                                                  text: "",
+                                                  replyMarkup: replyMarkupKeyboard);
+        }
+
+        private async Task EditLocation(CallbackQuery callbackQuery)
+        {
+            _userService.ChangeUserState(callbackQuery.From.Id, UserState.EditingLocation);
+            string text = "لطفا لوکیشن خود را بفرستید 👇";
+
+            await _botClient.DeleteMessageAsync(chatId: callbackQuery.From.Id, messageId: callbackQuery.Message.MessageId);
+
+            var replyMarkup = ReplyMarkupFactory.GetEditLocationKeyboard();
+            await _botClient.SendTextMessageAsync(chatId: callbackQuery.From.Id,
+                                                  text: text,
+                                                  replyMarkup: replyMarkup);
         }
 
         private async Task ChangeGender(CallbackQuery callbackQuery, GenderTypes gender)
@@ -125,6 +150,9 @@ namespace NotSoBoring.WebHook.Services.Handlers.CallbackQueryHandlers
 
             var genderName = gender.GetAttribute<DisplayAttribute>().Name;
             string text = $"جنسیت شما با موفقیت به \"{genderName}\" تغییر یافت ✔️";
+
+            await _botClient.DeleteMessageAsync(chatId: callbackQuery.From.Id, messageId: callbackQuery.Message.MessageId);
+
             await _botClient.SendTextMessageAsync(chatId: userId,
                                                   text: text);
         }
@@ -145,7 +173,10 @@ namespace NotSoBoring.WebHook.Services.Handlers.CallbackQueryHandlers
                 string firstText = "چت با مخاطب توسط شما قطع شد.";
                 string secondText = "چت توسط مخاطب شما قطع شد.";
 
-                var replyMarkup = ReplyMarkupFactory.GetDefaultKeyboardReplyMarkup();
+                var replyMarkup = ReplyMarkupFactory.GetDefaultKeyboard();
+
+                await _botClient.DeleteMessageAsync(chatId: callbackQuery.From.Id,
+                                                messageId: callbackQuery.Message.MessageId);
 
                 await _botClient.SendTextMessageAsync(chatId: userId,
                                                       text: firstText,

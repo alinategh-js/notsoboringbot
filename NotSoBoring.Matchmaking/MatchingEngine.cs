@@ -1,12 +1,12 @@
 ﻿using System.Linq;
+using Telegram.Bot;
 using System.Threading;
 using System.Threading.Tasks;
 using NotSoBoring.Domain.DTOs;
-using System.Collections.Concurrent;
-using NotSoBoring.Matchmaking.Users;
-using Telegram.Bot;
 using NotSoBoring.Domain.Utils;
 using NotSoBoring.Domain.Enums;
+using NotSoBoring.Matchmaking.Users;
+using System.Collections.Concurrent;
 
 namespace NotSoBoring.Matchmaking
 {
@@ -116,7 +116,7 @@ namespace NotSoBoring.Matchmaking
         private async Task NotifyUsers(long firstUserId, long secondUserId)
         {
             string text = "به یک ناشناس وصل شدی. سلام کن!";
-            var replyMarkup = ReplyMarkupFactory.GetInSessionKeyboardReplyMarkup();
+            var replyMarkup = ReplyMarkupFactory.GetInSessionKeyboard();
 
             await _botClient.SendTextMessageAsync(chatId: firstUserId,
                                                       text: text,

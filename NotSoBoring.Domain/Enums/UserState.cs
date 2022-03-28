@@ -13,6 +13,7 @@ namespace NotSoBoring.Domain.Enums
         EditingGender = 10002,
         EditingPhoto = 10003,
         EditingAge = 10004,
+        EditingLocation = 10005,
         Edit_Profile_End = 10020
     }
 }

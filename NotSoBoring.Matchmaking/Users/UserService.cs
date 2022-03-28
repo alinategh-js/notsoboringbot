@@ -99,6 +99,15 @@ namespace NotSoBoring.Matchmaking.Users
             return _users.Values.ToList();
         }
 
+        public async Task EditLocation(long userId, double latitude, double longitude)
+        {
+            var user = await _mainDb.Users.FirstOrDefaultAsync(x => x.Id == userId);
+            user.Latitude = latitude;
+            user.Longitude = longitude;
+            await _mainDb.SaveChangesAsync();
+            await FetchUsers();
+        }
+
         public async Task<ApplicationUser> GetUser(long userId)
         {
             if (_users == null)

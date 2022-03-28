@@ -30,16 +30,27 @@ namespace NotSoBoring.WebHook.Services.Handlers.MessageHandlers.MessageTypeStrat
                 action = message.Text! switch
                 {
                     StringUtils.Keyboard.CancelSession or "/endsession" => async () => await serviceProvider.GetRequiredService<CommandHandler>().CancelSession(message),
+                    StringUtils.Keyboard.Profile or "/profile" => async () => await serviceProvider.GetRequiredService<CommandHandler>().ShowProfile(message),
+                    StringUtils.Keyboard.SeeContactProfile => async () => await serviceProvider.GetRequiredService<CommandHandler>().ShowContactProfile(message),
+                    string command when command.StartsWith("/user_") => async () => await serviceProvider.GetRequiredService<CommandHandler>().ShowProfile(message, command.Substring(6)),
                     _ => async () => await serviceProvider.GetRequiredService<SessionHandler>().SendTextMessage(message)
                 };
             }
-            else if (userState == UserState.EditingNickname)
+            else if (userState > UserState.Edit_Profile_Start && userState < UserState.Edit_Profile_End)
             {
-                action = async () => await serviceProvider.GetRequiredService<CommandHandler>().EditNickname(message);
-            }
-            else if (userState == UserState.EditingAge)
-            {
-                action = async () => await serviceProvider.GetRequiredService<CommandHandler>().EditAge(message);
+                if(message.Text == StringUtils.Keyboard.CancelEdit)
+                {
+                    action = async () => await serviceProvider.GetRequiredService<CommandHandler>().CancelEditProfile(message);
+                }
+                else
+                {
+                    action = userState switch
+                    {
+                        UserState.EditingNickname => async () => await serviceProvider.GetRequiredService<CommandHandler>().EditNickname(message),
+                        UserState.EditingAge => async () => await serviceProvider.GetRequiredService<CommandHandler>().EditAge(message),
+                        _ => () => Task.CompletedTask
+                    };
+                }
             }
             else action = async () => await serviceProvider.GetRequiredService<GeneralHandler>().Usage(message);
 

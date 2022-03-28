@@ -5,7 +5,7 @@ namespace NotSoBoring.Domain.Utils
 {
     public static class ReplyMarkupFactory
     {
-        public static IReplyMarkup GetDefaultKeyboardReplyMarkup()
+        public static IReplyMarkup GetDefaultKeyboard()
         {
             ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup(
                 new[]
@@ -20,11 +20,12 @@ namespace NotSoBoring.Domain.Utils
             return replyKeyboardMarkup;
         }
 
-        public static IReplyMarkup GetInSessionKeyboardReplyMarkup()
+        public static IReplyMarkup GetInSessionKeyboard()
         {
             ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup(
                 new[]
                 {
+                    new KeyboardButton[] { StringUtils.Keyboard.SeeContactProfile },
                     new KeyboardButton[] { StringUtils.Keyboard.CancelSession },
                 })
             {
@@ -52,10 +53,10 @@ namespace NotSoBoring.Domain.Utils
         {
             return userState switch
             {
-                UserState.InMenu => GetDefaultKeyboardReplyMarkup(),
-                UserState.WaitingForMatch => GetDefaultKeyboardReplyMarkup(),
-                UserState.InSession => GetInSessionKeyboardReplyMarkup(),
-                _ => GetDefaultKeyboardReplyMarkup()
+                UserState.InMenu => GetDefaultKeyboard(),
+                UserState.WaitingForMatch => GetDefaultKeyboard(),
+                UserState.InSession => GetInSessionKeyboard(),
+                _ => GetDefaultKeyboard()
             };
         }
 
@@ -93,6 +94,10 @@ namespace NotSoBoring.Domain.Utils
                             StringUtils.InlineKeyboard.EditProfilePhoto,
                             StringUtils.InlineKeyboard.EditAge
                         },
+                        new InlineKeyboardButton[]
+                        {
+                            StringUtils.InlineKeyboard.EditLocation,
+                        },
                 });
 
             return inlineKeyboardMarkup;
@@ -111,6 +116,29 @@ namespace NotSoBoring.Domain.Utils
                 });
 
             return inlineKeyboardMarkup;
+        }
+
+        public static IReplyMarkup GetEditProfileKeyboard()
+        {
+            ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup(
+                new[]
+                {
+                    new KeyboardButton[] { StringUtils.Keyboard.CancelEdit }
+                });
+
+            return keyboardMarkup;
+        }
+
+        public static IReplyMarkup GetEditLocationKeyboard()
+        {
+            ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup(
+                new[]
+                {
+                    new KeyboardButton[] { KeyboardButton.WithRequestLocation(StringUtils.Keyboard.SendMyLocation) },
+                    new KeyboardButton[] { StringUtils.Keyboard.CancelEdit }
+                });
+
+            return keyboardMarkup;
         }
 
         public static IReplyMarkup GetEndSessionInlineKeyboard()

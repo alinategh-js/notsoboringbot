@@ -52,7 +52,7 @@ namespace NotSoBoring.WebHook.Services.Handlers.MessageHandlers
                 return;
 
             string text = "";
-            var replyMarkup = ReplyMarkupFactory.GetDefaultKeyboardReplyMarkup();
+            var replyMarkup = ReplyMarkupFactory.GetDefaultKeyboard();
             if (_matchingEngine.TryCancelRequest(userId))
             {
                 text = "درخواستی که داده بودی لغو شد.";
@@ -85,8 +85,20 @@ namespace NotSoBoring.WebHook.Services.Handlers.MessageHandlers
             }
             else
             {
+                var replyMarkup = ReplyMarkupFactory.GetDefaultKeyboard();
                 await _botClient.SendTextMessageAsync(chatId: userId,
-                                                      text: text);
+                                                      text: text,
+                                                      replyMarkup: replyMarkup);
+            }
+        }
+
+        public async Task ShowContactProfile(Message message)
+        {
+            var userId = message.From.Id;
+            if(_matchingEngine.IsUserInSession(userId, out var secondUserId))
+            {
+                var targetUser = await _userService.GetUser(secondUserId);
+                await ShowProfile(message, targetUser.UniqueId);
             }
         }
 
@@ -98,7 +110,9 @@ namespace NotSoBoring.WebHook.Services.Handlers.MessageHandlers
             if (anotherUniqueId == null)
                 targetUser = user;
             else
+            {
                 targetUser = await _userService.GetUser(anotherUniqueId);
+            }
 
             if (targetUser != null)
             {
@@ -108,13 +122,26 @@ namespace NotSoBoring.WebHook.Services.Handlers.MessageHandlers
                 string gender = targetUser.Gender != null ? targetUser.Gender.GetAttribute<DisplayAttribute>()?.Name : "❌";
                 string photo = targetUser.Photo ?? _configuration["BotImages:DefaultProfileImage"];
                 string uniqueId = targetUser.UniqueId;
+
                 var lastActivity = _userService.GetUserRecentActivity(targetUser.Id);
                 var isInSession = _matchingEngine.IsUserInSession(targetUser.Id);
                 string onlineStatus = StringUtils.GetUserOnlineStatus(lastActivity, isInSession);
+
+                double distance = 0;
+                string distanceString = "نامشخص";
+                if(targetUser != user && targetUser.Latitude.HasValue && targetUser.Longitude.HasValue
+                    && user.Latitude.HasValue && user.Longitude.HasValue)
+                {
+                    distance = Math.Round(LocationUtils.CalculateDistance(targetUser.Latitude.Value, targetUser.Longitude.Value, user.Latitude.Value, user.Longitude.Value));
+                    distanceString = LocationUtils.DistanceToString(distance);
+                }
+                bool showDistance = user != targetUser;
+                string distanceFinalString = showDistance ? $"فاصله: {distanceString}\n\n" : string.Empty;
                 string caption = $"نام مستعار: {nickname}\n"
                                  + $"جنسیت: {gender}\n"
                                  + $"سن: {age}\n\n"
                                  + $"وضعیت: {onlineStatus}\n\n"
+                                 + distanceFinalString
                                  + $"🆔: /user_{uniqueId}";
 
                 await _botClient.SendPhotoAsync(chatId: userId,
@@ -169,6 +196,35 @@ namespace NotSoBoring.WebHook.Services.Handlers.MessageHandlers
             string text = "عکس پروفایل شما با موفقیت تغییر یافت ✔️";
             await _botClient.SendTextMessageAsync(chatId: userId,
                                                   text: text);
+        }
+
+        public async Task EditLocation(Message message)
+        {
+            if (message.Location == null)
+                return;
+
+            var userId = message.From.Id;
+            await _userService.EditLocation(userId, message.Location.Latitude, message.Location.Longitude);
+            _userService.ChangeUserState(userId, UserState.InMenu);
+
+            string text = "موقعیت مکانی شما با موفقیت تغییر یافت ✔️";
+            var replyMarkup = ReplyMarkupFactory.GetDefaultKeyboard();
+            await _botClient.SendTextMessageAsync(chatId: userId,
+                                                  text: text,
+                                                  replyMarkup: replyMarkup);
+        }
+
+        public async Task CancelEditProfile(Message message)
+        {
+            _userService.ChangeUserState(message.From.Id, UserState.InMenu);
+            string text = "عملیات ویرایش پروفایل لغو شد. 👍";
+
+            await _botClient.DeleteMessageAsync(chatId: message.From.Id, messageId: message.MessageId);
+
+            var replyMarkup = ReplyMarkupFactory.GetDefaultKeyboard();
+            await _botClient.SendTextMessageAsync(chatId: message.From.Id,
+                                                  text: text,
+                                                  replyMarkup: replyMarkup);
         }
     }
 }

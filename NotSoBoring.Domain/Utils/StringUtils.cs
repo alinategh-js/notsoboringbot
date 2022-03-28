@@ -11,8 +11,11 @@ namespace NotSoBoring.Domain.Utils
         {
             public const string ConnectMeToAnAnonymous = "به یه ناشناس وصلم کن! 🎲";
             public const string CancelRequest = "لغو درخواست ❌";
+            public const string SeeContactProfile = "مشاهده پروفایل مخاطب 📖";
             public const string CancelSession = "اتمام چت ❌";
             public const string Profile = "مشاهده پروفایل 👨";
+            public const string SendMyLocation = "فرستادن لوکیشن من 📌";
+            public const string CancelEdit = "لغو ویرایش ❌";
         }
 
         public static class InlineKeyboard
@@ -22,6 +25,7 @@ namespace NotSoBoring.Domain.Utils
             public const string EditGender = "جنسیت 📝";
             public const string EditAge = "سن 📝";
             public const string EditProfilePhoto = "عکس 📝";
+            public const string EditLocation = "لوکیشن 📌";
 
             public const string Male = "پسر 👨";
             public const string Female = "دختر 👩";

@@ -19,7 +19,7 @@ namespace NotSoBoring.WebHook.Services.Handlers.MessageHandlers
             const string usage = "نگرفتم چی گفتی 🤔\n\n" +
                                  "از منوی پایین میتونی انتخاب کنی تا کمکت کنم 👇";
 
-            var replyMarkup = ReplyMarkupFactory.GetDefaultKeyboardReplyMarkup();
+            var replyMarkup = ReplyMarkupFactory.GetDefaultKeyboard();
 
             return await _botClient.SendTextMessageAsync(chatId: message.Chat.Id,
                                                   text: usage,
