@@ -55,7 +55,7 @@ namespace NotSoBoring.Matchmaking
         {
             if(_matchedSessions.TryRemove(userId, out secondUserId) && _matchedSessions.TryRemove(secondUserId, out long firstUserId))
             {
-                _userService.ChangeUserState(userId, UserState.InSession);
+                _userService.ChangeUserState(userId, UserState.InMenu);
                 return true;
             }
 

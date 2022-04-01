@@ -12,6 +12,7 @@ using NotSoBoring.WebHook.Services.Handlers;
 using System.Threading;
 using Telegram.Bot;
 using NotSoBoring.WebHook.Extensions;
+using Serilog;
 
 namespace NotSoBoring.WebHook
 {
@@ -43,6 +44,10 @@ namespace NotSoBoring.WebHook
 
             var mainDbConnectionString = Configuration.GetConnectionString("MainDbContext");
             services.AddDbContext<MainDbContext>(x => x.UseSqlServer(mainDbConnectionString).EnableDetailedErrors(), ServiceLifetime.Transient, ServiceLifetime.Transient);
+
+            Log.Logger = new LoggerConfiguration()
+                .WriteTo.File("Serilog/my-logs.txt", rollingInterval: RollingInterval.Day)
+                .CreateLogger();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

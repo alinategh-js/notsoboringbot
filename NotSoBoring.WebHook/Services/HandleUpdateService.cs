@@ -11,6 +11,7 @@ using Telegram.Bot.Types.Enums;
 using NotSoBoring.WebHook.Services.Handlers.MessageHandlers.MessageTypeStrategies;
 using NotSoBoring.Domain.Enums;
 using NotSoBoring.WebHook.Services.Handlers.CallbackQueryHandlers;
+using Serilog;
 
 namespace NotSoBoring.WebHook.Services
 {
@@ -106,6 +107,7 @@ namespace NotSoBoring.WebHook.Services
             };
 
             _logger.LogInformation("HandleError: {ErrorMessage}", ErrorMessage);
+            Log.Information("HandleUpdateService:HandleErrorAsync : {ErrorMessage}", ErrorMessage);
             return Task.CompletedTask;
         }
     }

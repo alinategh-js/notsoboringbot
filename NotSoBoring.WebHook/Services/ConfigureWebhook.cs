@@ -4,6 +4,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -40,9 +41,17 @@ namespace NotSoBoring.WebHook.Services
             var webhookAddress = @$"{_botConfig.HostAddress}/bot/{_botConfig.BotToken}";
             _logger.LogInformation("Setting webhook: {webhookAddress}", webhookAddress);
 
+            FileStream publicKey = null;
+            if (!string.IsNullOrWhiteSpace(_botConfig.CertificatePublicKeyPath) && File.Exists(_botConfig.CertificatePublicKeyPath))
+            {
+                publicKey = File.OpenRead(_botConfig.CertificatePublicKeyPath);
+            }
+
             await botClient.SetWebhookAsync(
                 url: webhookAddress,
                 allowedUpdates: Array.Empty<UpdateType>(),
+                maxConnections: 100,
+                certificate: publicKey,
                 cancellationToken: cancellationToken);
         }
 

@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using NotSoBoring.WebHook.Services;
+using Serilog;
+using System;
 using System.Threading.Tasks;
 using Telegram.Bot.Types;
 
@@ -11,8 +13,16 @@ namespace NotSoBoring.WebHook.Controllers
         public async Task<IActionResult> Post([FromServices] HandleUpdateService handleUpdateService,
                                           [FromBody] Update update)
         {
-            await handleUpdateService.EchoAsync(update);
-            return Ok();
+            try
+            {
+                await handleUpdateService.EchoAsync(update);
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                Log.Information("WebhookController:Post : {ErrorMessage}", e.Message);
+                return BadRequest(e.Message);
+            }
         }
     }
 }
