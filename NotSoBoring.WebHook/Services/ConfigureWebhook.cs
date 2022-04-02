@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.InputFiles;
 
 namespace NotSoBoring.WebHook.Services
 {
@@ -41,17 +42,18 @@ namespace NotSoBoring.WebHook.Services
             var webhookAddress = @$"{_botConfig.HostAddress}/bot/{_botConfig.BotToken}";
             _logger.LogInformation("Setting webhook: {webhookAddress}", webhookAddress);
 
-            FileStream publicKey = null;
+            InputFileStream cert = null;
             if (!string.IsNullOrWhiteSpace(_botConfig.CertificatePublicKeyPath) && File.Exists(_botConfig.CertificatePublicKeyPath))
             {
-                publicKey = File.OpenRead(_botConfig.CertificatePublicKeyPath);
+                FileStream publicKey = File.OpenRead(_botConfig.CertificatePublicKeyPath);
+                cert = new InputFileStream(publicKey);
             }
 
             await botClient.SetWebhookAsync(
                 url: webhookAddress,
                 allowedUpdates: Array.Empty<UpdateType>(),
                 maxConnections: 100,
-                certificate: publicKey,
+                certificate: cert,
                 cancellationToken: cancellationToken);
         }
 

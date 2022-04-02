@@ -160,14 +160,16 @@ namespace NotSoBoring.WebHook.Services.Handlers.MessageHandlers
             _userService.ChangeUserState(userId, UserState.InMenu);
 
             string text = $"نام مستعار شما با موفقیت به \"{newNickname}\" تغییر یافت ✔️";
+            var replyMarkup = ReplyMarkupFactory.GetDefaultKeyboard();
             await _botClient.SendTextMessageAsync(chatId: userId,
-                                                  text: text);
+                                                  text: text,
+                                                  replyMarkup: replyMarkup);
         }
 
         public async Task EditAge(Message message)
         {
             string text = "";
-            if (!Int32.TryParse(message.Text.Trim(), out int newAge) || newAge > 99 || newAge < 1)
+            if (!int.TryParse(message.Text.Trim(), out int newAge) || newAge > 99 || newAge < 1)
             {
                 text = "لطفا عددی بین 1 تا 99 وارد کنید (کاراکتر های انگلیسی)";
                 await _botClient.SendTextMessageAsync(chatId: message.From.Id,
@@ -180,8 +182,10 @@ namespace NotSoBoring.WebHook.Services.Handlers.MessageHandlers
             _userService.ChangeUserState(userId, UserState.InMenu);
 
             text = $"سن شما با موفقیت به \"{newAge}\" تغییر یافت ✔️";
+            var replyMarkup = ReplyMarkupFactory.GetDefaultKeyboard();
             await _botClient.SendTextMessageAsync(chatId: userId,
-                                                  text: text);
+                                                  text: text,
+                                                  replyMarkup: replyMarkup);
         }
 
         public async Task EditProfilePhoto(Message message)
@@ -194,8 +198,10 @@ namespace NotSoBoring.WebHook.Services.Handlers.MessageHandlers
             _userService.ChangeUserState(userId, UserState.InMenu);
 
             string text = "عکس پروفایل شما با موفقیت تغییر یافت ✔️";
+            var replyMarkup = ReplyMarkupFactory.GetDefaultKeyboard();
             await _botClient.SendTextMessageAsync(chatId: userId,
-                                                  text: text);
+                                                  text: text,
+                                                  replyMarkup: replyMarkup);
         }
 
         public async Task EditLocation(Message message)
