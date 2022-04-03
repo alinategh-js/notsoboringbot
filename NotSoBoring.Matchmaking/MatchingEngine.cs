@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using Serilog;
+using System.Linq;
 using Telegram.Bot;
 using System.Threading;
 using System.Threading.Tasks;
@@ -86,12 +87,25 @@ namespace NotSoBoring.Matchmaking
             MatchRequest[] requestsArray;
             while (!_cancellationToken.IsCancellationRequested)
             {
-                if (_matchRequests.Count >= 2 && _matchRequests.TryDequeue(out var firstRequest) && !firstRequest.IsCancelled)
+                if (_matchRequests.TryDequeue(out var firstRequest))
                 {
+                    if (firstRequest.IsCancelled) // the request is cancelled
+                        continue;
+
+                    if (_matchedSessions.TryGetValue(firstRequest.UserId, out var secondUserId)) // means user is in a session already
+                        continue;
+                    
                     // make an array from the requests queue so that it doesn't change until we are done processing firstRequest
                     requestsArray = _matchRequests.ToArray();
+                    bool foundMatch = false;
                     foreach (var request in requestsArray)
                     {
+                        if(request.UserId == firstRequest.UserId)
+                        {
+                            request.IsCancelled = true;
+                            continue;
+                        }
+
                         if (await IsMatched(request, firstRequest))
                         {
                             _matchedSessions.TryAdd(firstRequest.UserId, request.UserId);
@@ -99,13 +113,20 @@ namespace NotSoBoring.Matchmaking
                             request.IsCancelled = true;
                             _userService.ChangeUserState(firstRequest.UserId, UserState.InSession);
                             _userService.ChangeUserState(request.UserId, UserState.InSession);
-                            _ = Task.Run(() => NotifyUsers(firstRequest.UserId, request.UserId));
+                            await NotifyUsers(firstRequest.UserId, request.UserId);
+                            foundMatch = true;
+
+                            Log.Information("_matchRequests: {matchRequests}\n_matchedSessions: {matchedSessions}", _matchRequests, _matchedSessions);
                             break;
                         }
                     }
 
-                    // didn't find a match, enqueue the firstRequest
-                    _matchRequests.Enqueue(firstRequest);
+                    if (!foundMatch)
+                    {
+                        // didn't find a match, enqueue the firstRequest
+                        _matchRequests.Enqueue(firstRequest);
+                        await Task.Delay(10);
+                    }
                 }
                 else
                 {
