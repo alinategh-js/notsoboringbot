@@ -12,24 +12,31 @@ using NotSoBoring.WebHook.Services.Handlers.MessageHandlers.MessageTypeStrategie
 using NotSoBoring.Domain.Enums;
 using NotSoBoring.WebHook.Services.Handlers.CallbackQueryHandlers;
 using Serilog;
+using NotSoBoring.Domain.Utils;
+using Microsoft.Extensions.Configuration;
 
 namespace NotSoBoring.WebHook.Services
 {
     public class HandleUpdateService
     {
         private readonly ILogger<HandleUpdateService> _logger;
+        private readonly ITelegramBotClient _botClient;
         private readonly UserService _userService;
         private readonly IServiceProvider _serviceProvider;
         private readonly CallbackQueryHandler _callbackQueryHandler;
+        private readonly BotConfiguration _botConfig;
 
-        public HandleUpdateService(ILogger<HandleUpdateService> logger,
+        public HandleUpdateService(ITelegramBotClient botClient,
+            ILogger<HandleUpdateService> logger,
             UserService userService, IServiceProvider serviceProvider,
-            CallbackQueryHandler callbackQueryHandler)
+            CallbackQueryHandler callbackQueryHandler, IConfiguration configuration)
         {
+            _botClient = botClient;
             _logger = logger;
             _userService = userService;
             _serviceProvider = serviceProvider;
             _callbackQueryHandler = callbackQueryHandler;
+            _botConfig = configuration.GetSection("BotConfiguration").Get<BotConfiguration>();
         }
 
         public async Task EchoAsync(Update update)
@@ -56,7 +63,8 @@ namespace NotSoBoring.WebHook.Services
             if (message.From == null)
                 return;
 
-            var userState = await CheckUser(message.From.Id);
+            (bool result, var userState) = await CheckUser(message.From.Id);
+            if (!result) return;
 
             Func<Task> action = MessageHandlerFactory.GetMessageHandler(message.Type).HandleMessage(message, userState, _serviceProvider);
 
@@ -68,15 +76,40 @@ namespace NotSoBoring.WebHook.Services
             if (callbackQuery.From == null)
                 return;
 
-            var userState = await CheckUser(callbackQuery.From.Id);
+            (bool result, var userState) = await CheckUser(callbackQuery.From.Id);
+            if (!result) return;
 
             Func<Task> action = _callbackQueryHandler.HandleCallbackQuery(callbackQuery, userState);
 
             await action.Invoke();
         }
 
-        private async Task<UserState> CheckUser(long userId)
+        private async Task<(bool, UserState)> CheckUser(long userId)
         {
+            // check if user is a member of our channel
+            string shouldJoinChannel = "برای استفاده از ربات باید عضو کانال ما باشید. \n\n"
+                                     + $"آیدی چنل : 👈 {_botConfig.TelegramChannel}";
+
+            try
+            {
+                var chatMember = await _botClient.GetChatMemberAsync(_botConfig.TelegramChannel, userId);
+                if (chatMember == null || chatMember.Status == ChatMemberStatus.Left 
+                    || chatMember.Status == ChatMemberStatus.Kicked || chatMember.Status == ChatMemberStatus.Restricted)
+                {
+                    await _botClient.SendTextMessageAsync(chatId: userId,
+                                                          text: shouldJoinChannel);
+
+                    return (false, UserState.InMenu);
+                }
+            }
+            catch
+            {
+                await _botClient.SendTextMessageAsync(chatId: userId,
+                                                          text: shouldJoinChannel);
+
+                return (false, UserState.InMenu);
+            }
+
             // check if user exists
             var user = await _userService.GetUser(userId);
             if (user == null)
@@ -89,7 +122,7 @@ namespace NotSoBoring.WebHook.Services
             _userService.UpdateUserRecentActivity(userId);
 
             var userState = _userService.GetUserState(userId);
-            return userState;
+            return (true, userState);
         }
 
         private Task UnknownUpdateHandlerAsync(Update update)

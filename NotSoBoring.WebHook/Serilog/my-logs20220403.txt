@@ -1,0 +1,18 @@
+2022-04-03 21:21:16.371 +04:30 [INF] _matchRequests: ["NotSoBoring.Domain.DTOs.MatchRequest"]
+_matchedSessions: ["[5135710499, 89618785]","[89618785, 5135710499]"]
+2022-04-03 21:30:18.978 +04:30 [INF] App initializing
+2022-04-03 21:55:06.586 +04:30 [INF] App initializing
+2022-04-03 21:55:17.877 +04:30 [INF] HandleUpdateService:HandleErrorAsync : Telegram API Error:
+[400]
+Bad Request: user not found
+2022-04-03 21:55:28.944 +04:30 [INF] HandleUpdateService:HandleErrorAsync : Telegram API Error:
+[400]
+Bad Request: user not found
+2022-04-03 21:55:57.133 +04:30 [INF] HandleUpdateService:HandleErrorAsync : Telegram API Error:
+[400]
+Bad Request: user not found
+2022-04-03 22:26:49.639 +04:30 [INF] App initializing
+2022-04-03 22:28:21.719 +04:30 [INF] App initializing
+2022-04-03 22:31:48.345 +04:30 [INF] App initializing
+2022-04-03 22:40:16.079 +04:30 [INF] App initializing
+2022-04-03 22:41:12.888 +04:30 [INF] App initializing

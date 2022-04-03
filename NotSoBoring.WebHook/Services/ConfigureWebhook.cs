@@ -48,7 +48,7 @@ namespace NotSoBoring.WebHook.Services
                 FileStream publicKey = File.OpenRead(_botConfig.CertificatePublicKeyPath);
                 cert = new InputFileStream(publicKey);
             }
-
+            
             await botClient.SetWebhookAsync(
                 url: webhookAddress,
                 allowedUpdates: Array.Empty<UpdateType>(),

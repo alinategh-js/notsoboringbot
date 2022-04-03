@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace NotSoBoring.Domain.Utils
 {
@@ -42,6 +40,16 @@ namespace NotSoBoring.Domain.Utils
         {
             public const string InvalidInput = "پیامی که فرستادی نامعتبره، دوباره تلاش کن ❌";
             public const string CantEditProfileInSession = "امکان ویرایش پروفایل هنگام چت وجود ندارد ❌";
+            public const string ProfileIsNotComplete = "اطلاعات پروفایل شما کامل نیست. لطفا پس از تکمیل پروفایل خود دوباره تلاش کنید.";
+        }
+
+        public static class CacheSettings
+        {
+            public static class Keys
+            {
+                public static string UserInfo(long userId) => $"UserInfo_{userId}";
+                public static string UserState(long userId) => $"UserState_{userId}";
+            }
         }
 
         public static string GetUserOnlineStatus(DateTimeOffset? lastActivity, bool isInSession)

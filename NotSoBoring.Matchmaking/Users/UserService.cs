@@ -1,9 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using NotSoBoring.Core.Enums;
 using NotSoBoring.Core.Models;
 using NotSoBoring.DataAccess;
 using NotSoBoring.Domain.Enums;
+using NotSoBoring.Domain.Utils;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -16,18 +18,26 @@ namespace NotSoBoring.Matchmaking.Users
     public class UserService
     {
         private readonly MainDbContext _mainDb;
-        private ConcurrentDictionary<long, ApplicationUser> _users;
         private ConcurrentDictionary<long, UserState> _userStates;
         private ConcurrentDictionary<long, DateTimeOffset> _usersRecentActivity;
+        private readonly IMemoryCache _memoryCache;
         private readonly ILogger<UserService> _logger;
 
-        public UserService(MainDbContext mainDb, ILogger<UserService> logger)
+        public UserService(MainDbContext mainDb, ILogger<UserService> logger, IMemoryCache memoryCache)
         {
             _mainDb = mainDb;
             _logger = logger;
+            _memoryCache = memoryCache;
             _userStates = new ConcurrentDictionary<long, UserState>();
             _usersRecentActivity = new ConcurrentDictionary<long, DateTimeOffset>();
         }
+
+        // static constructor for first initialization of the class
+        //static UserService()
+        //{
+        //    _userStates = new ConcurrentDictionary<long, UserState>();
+        //    _usersRecentActivity = new ConcurrentDictionary<long, DateTimeOffset>();
+        //}
 
         public async Task AddUser(long userId)
         {
@@ -51,7 +61,6 @@ namespace NotSoBoring.Matchmaking.Users
 
                 _mainDb.Users.Add(newUser);
                 await _mainDb.SaveChangesAsync();
-                await FetchUsers();
             }
             catch (Exception e)
             {
@@ -64,7 +73,7 @@ namespace NotSoBoring.Matchmaking.Users
             var user = await _mainDb.Users.FirstOrDefaultAsync(x => x.Id == userId);
             user.Nickname = nickname;
             await _mainDb.SaveChangesAsync();
-            await FetchUsers();
+            RemoveUserInfoCache(userId);
         }
 
         public async Task EditAge(long userId, int age)
@@ -72,7 +81,7 @@ namespace NotSoBoring.Matchmaking.Users
             var user = await _mainDb.Users.FirstOrDefaultAsync(x => x.Id == userId);
             user.Age = age;
             await _mainDb.SaveChangesAsync();
-            await FetchUsers();
+            RemoveUserInfoCache(userId);
         }
 
         public async Task EditGender(long userId, GenderTypes gender)
@@ -80,7 +89,7 @@ namespace NotSoBoring.Matchmaking.Users
             var user = await _mainDb.Users.FirstOrDefaultAsync(x => x.Id == userId);
             user.Gender = gender;
             await _mainDb.SaveChangesAsync();
-            await FetchUsers();
+            RemoveUserInfoCache(userId);
         }
 
         public async Task EditPhoto(long userId, string fileId)
@@ -88,15 +97,7 @@ namespace NotSoBoring.Matchmaking.Users
             var user = await _mainDb.Users.FirstOrDefaultAsync(x => x.Id == userId);
             user.Photo = fileId;
             await _mainDb.SaveChangesAsync();
-            await FetchUsers();
-        }
-
-        public async Task<List<ApplicationUser>> GetAllUsers()
-        {
-            if (_users == null)
-                await FetchUsers();
-
-            return _users.Values.ToList();
+            RemoveUserInfoCache(userId);
         }
 
         public async Task EditLocation(long userId, double latitude, double longitude)
@@ -105,25 +106,25 @@ namespace NotSoBoring.Matchmaking.Users
             user.Latitude = latitude;
             user.Longitude = longitude;
             await _mainDb.SaveChangesAsync();
-            await FetchUsers();
+            RemoveUserInfoCache(userId);
         }
 
         public async Task<ApplicationUser> GetUser(long userId)
         {
-            if (_users == null)
-                await FetchUsers();
+            if(!_memoryCache.TryGetValue(StringUtils.CacheSettings.Keys.UserInfo(userId), out ApplicationUser user))
+            {
+                user = await _mainDb.Users.FirstOrDefaultAsync(x => x.Id == userId);
+                if (user != null)
+                    _memoryCache.Set(StringUtils.CacheSettings.Keys.UserInfo(userId), user);
+            }
 
-            if (_users.TryGetValue(userId, out var user))
-                return user;
-            else return null; // user does not exist
+            return user;
         }
 
         public async Task<ApplicationUser> GetUser(string uniqueId)
         {
-            if (_users == null)
-                await FetchUsers();
-
-            return _users.FirstOrDefault(x => x.Value.UniqueId == uniqueId).Value;
+            var user = await _mainDb.Users.FirstOrDefaultAsync(x => x.UniqueId == uniqueId);
+            return user;
         }
 
         public UserState GetUserState(long userId)
@@ -160,10 +161,24 @@ namespace NotSoBoring.Matchmaking.Users
             else return null;
         }
 
-        private async Task FetchUsers()
+        public async Task<bool> IsProfileCompleted(long userId)
         {
-            var users = await _mainDb.Users.ToDictionaryAsync(x => x.Id, y => y);
-            _users = new ConcurrentDictionary<long, ApplicationUser>(users);
+            if(!_memoryCache.TryGetValue(StringUtils.CacheSettings.Keys.UserInfo(userId), out ApplicationUser user))
+                user = await GetUser(userId);
+
+            if (user.Gender == null) return false;
+            if (user.Nickname == null) return false;
+            if (user.Age == null) return false;
+
+            return true;
+        }
+
+        private void RemoveUserInfoCache(long userId)
+        {
+            if(_memoryCache.TryGetValue(StringUtils.CacheSettings.Keys.UserInfo(userId), out var user))
+            {
+                _memoryCache.Remove(StringUtils.CacheSettings.Keys.UserInfo(userId));
+            }
         }
     }
 }

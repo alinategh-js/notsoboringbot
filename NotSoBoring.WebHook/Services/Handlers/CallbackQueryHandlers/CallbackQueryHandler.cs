@@ -197,19 +197,9 @@ namespace NotSoBoring.WebHook.Services.Handlers.CallbackQueryHandlers
         private async Task ConnectToAnonymous(CallbackQuery callbackQuery, GenderTypes? genderPreferrence = null)
         {
             var userId = callbackQuery.From.Id;
-            if (_matchingEngine.IsUserInSession(userId))
-                return;
 
-            string text = "";
-            if (_matchingEngine.TryAddRequest(new MatchRequest { UserId = userId, PreferredGender = genderPreferrence }))
-            {
-                text = "منتظر باش تا به یکی وصلت کنم 🕐 ";
-            }
-            else
-            {
-                text = "شما کمی پیش درخواست دادید، لطفا کمی صبر کنید تا به یک نفر متصل شوید.\n\n" +
-                    "در غیر اینصورت میتوانید درخواست خود را با /cancel لغو کنید.";
-            }
+            (bool result, string text) = await _matchingEngine.TryAddRequest(new MatchRequest { UserId = userId, PreferredGender = genderPreferrence });
+            
             await _botClient.DeleteMessageAsync(chatId: userId, messageId: callbackQuery.Message.MessageId);
             await _botClient.SendTextMessageAsync(chatId: userId,
                                                       text: text);

@@ -38,6 +38,7 @@ namespace NotSoBoring.WebHook
 
             services.AddScopedServices();
             services.AddSingletonServices();
+            services.AddTransientServices();
 
             services.AddControllers()
                 .AddNewtonsoftJson();
@@ -46,8 +47,12 @@ namespace NotSoBoring.WebHook
             services.AddDbContext<MainDbContext>(x => x.UseSqlServer(mainDbConnectionString).EnableDetailedErrors(), ServiceLifetime.Transient, ServiceLifetime.Transient);
 
             Log.Logger = new LoggerConfiguration()
-                .WriteTo.File("Serilog/my-logs.txt", rollingInterval: RollingInterval.Day)
+                .WriteTo.File("./Serilog/my-logs.txt", rollingInterval: RollingInterval.Day)
                 .CreateLogger();
+
+            Log.Information("App initializing");
+
+            services.AddMemoryCache();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

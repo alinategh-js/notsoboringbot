@@ -26,8 +26,8 @@ namespace NotSoBoring.WebHook.Extensions
             CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
 
             services.AddSingleton(cancellationTokenSource);
-            services.AddSingleton<UserService>();
             services.AddSingleton<MatchingEngine>();
+            services.AddSingleton<UserService>();
 
             return services;
         }

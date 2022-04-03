@@ -1,6 +1,4 @@
-﻿using NotSoBoring.Domain.Enums;
-using NotSoBoring.Domain.Utils;
-using NotSoBoring.Matchmaking;
+﻿using NotSoBoring.Matchmaking;
 using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -24,8 +22,7 @@ namespace NotSoBoring.WebHook.Services.Handlers.MessageHandlers
             if(_matchingEngine.IsUserInSession(userId, out var secondUserId))
             {
                 await _botClient.SendTextMessageAsync(chatId: secondUserId,
-                                                      text: message.Text,
-                                                      replyToMessageId: message.ReplyToMessage?.MessageId);
+                                                      text: message.Text);
             }
         }
 
@@ -35,8 +32,7 @@ namespace NotSoBoring.WebHook.Services.Handlers.MessageHandlers
             if (_matchingEngine.IsUserInSession(userId, out var secondUserId))
             {
                 await _botClient.SendStickerAsync(chatId: secondUserId,
-                                                      sticker: message.Sticker?.FileId,
-                                                      replyToMessageId: message.ReplyToMessage?.MessageId);
+                                                      sticker: message.Sticker?.FileId);
             }
         }
 
@@ -46,8 +42,7 @@ namespace NotSoBoring.WebHook.Services.Handlers.MessageHandlers
             if (_matchingEngine.IsUserInSession(userId, out var secondUserId))
             {
                 await _botClient.SendVoiceAsync(chatId: secondUserId,
-                                                      voice: message.Voice?.FileId,
-                                                      replyToMessageId: message.ReplyToMessage?.MessageId);
+                                                      voice: message.Voice?.FileId);
             }
         }
 
@@ -57,8 +52,7 @@ namespace NotSoBoring.WebHook.Services.Handlers.MessageHandlers
             if (_matchingEngine.IsUserInSession(userId, out var secondUserId))
             {
                 await _botClient.SendPhotoAsync(chatId: secondUserId,
-                                                      photo: message.Photo[0]?.FileId,
-                                                      replyToMessageId: message.ReplyToMessage?.MessageId);
+                                                      photo: message.Photo[0]?.FileId);
             }
         }
 
@@ -69,8 +63,7 @@ namespace NotSoBoring.WebHook.Services.Handlers.MessageHandlers
             {
                 await _botClient.SendLocationAsync(chatId: secondUserId,
                                                       latitude: message.Location.Latitude,
-                                                      longitude: message.Location.Longitude,
-                                                      replyToMessageId: message.ReplyToMessage?.MessageId);
+                                                      longitude: message.Location.Longitude);
             }
         }
     }

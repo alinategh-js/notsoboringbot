@@ -29,14 +29,29 @@ namespace NotSoBoring.Matchmaking
             Task.Factory.StartNew(async () => await Processor(), _cancellationToken, TaskCreationOptions.LongRunning, TaskScheduler.Current);
         }
 
-        public bool TryAddRequest(MatchRequest request)
+        public async Task<(bool, string)> TryAddRequest(MatchRequest request)
         {
+            bool isProfileCompleted = await _userService.IsProfileCompleted(request.UserId);
+            if (!isProfileCompleted)
+            {
+                var reason = StringUtils.Errors.ProfileIsNotComplete;
+                return (false, reason);
+            }
+
             if (_matchRequests.Any(x => x.UserId == request.UserId && !x.IsCancelled))
-                return false;
+            {
+                var reason = "شما کمی پیش درخواست دادید، لطفا کمی صبر کنید تا به یک نفر متصل شوید.\n\n" +
+                    "در غیر اینصورت میتوانید درخواست خود را با /cancel لغو کنید.";
+                return (false, reason);
+            }
+
+            if (IsUserInSession(request.UserId))
+                return (false, "شما در حال حاضر در حال چت میباشید.");
 
             _matchRequests.Enqueue(request);
             _userService.ChangeUserState(request.UserId, UserState.WaitingForMatch);
-            return true;
+            var text = "منتظر باش تا به یکی وصلت کنم 🕐 ";
+            return (true, text);
         }
 
         public bool TryCancelRequest(long userId)
@@ -115,8 +130,6 @@ namespace NotSoBoring.Matchmaking
                             _userService.ChangeUserState(request.UserId, UserState.InSession);
                             await NotifyUsers(firstRequest.UserId, request.UserId);
                             foundMatch = true;
-
-                            Log.Information("_matchRequests: {matchRequests}\n_matchedSessions: {matchedSessions}", _matchRequests, _matchedSessions);
                             break;
                         }
                     }
