@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NotSoBoring.Domain.Models
 {
-    public class Contact
+    public class ApplicationContact
     {
         [ForeignKey("User")]
         public long UserId { get; set; }

@@ -16,20 +16,20 @@ namespace NotSoBoring.DataAccess
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Contact>()
+            modelBuilder.Entity<ApplicationContact>()
                 .HasOne(c => c.ContactUser)
                 .WithOne()
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<Contact>()
+            modelBuilder.Entity<ApplicationContact>()
                 .HasOne(c => c.User)
                 .WithOne()
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<Contact>().HasKey(c => new { c.UserId, c.ContactId });
+            modelBuilder.Entity<ApplicationContact>().HasKey(c => new { c.UserId, c.ContactId });
         }
        
         public DbSet<ApplicationUser> Users { get; set; }
-        public DbSet<Contact> Contacts { get; set; }
+        public DbSet<ApplicationContact> Contacts { get; set; }
     }
 }

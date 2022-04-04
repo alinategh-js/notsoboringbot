@@ -49,6 +49,7 @@ namespace NotSoBoring.Domain.Utils
             {
                 public static string UserInfo(long userId) => $"UserInfo_{userId}";
                 public static string UserState(long userId) => $"UserState_{userId}";
+                public static string UserContacts(long userId) => $"UserContacts_{userId}";
             }
         }
 

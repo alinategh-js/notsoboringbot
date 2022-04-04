@@ -17,6 +17,7 @@ namespace NotSoBoring.WebHook.Extensions
             services.AddScoped<SessionHandler>();
             services.AddScoped<GeneralHandler>();
             services.AddScoped<CallbackQueryHandler>();
+            services.AddScoped<ContactService>();
 
             return services;
         }
