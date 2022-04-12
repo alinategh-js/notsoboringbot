@@ -11,6 +11,10 @@ using NotSoBoring.Domain.Extensions;
 using System.ComponentModel.DataAnnotations;
 using NotSoBoring.Matchmaking;
 using NotSoBoring.Domain.DTOs;
+using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.InlineQueryResults;
+using System.Linq;
+using System.Text;
 
 namespace NotSoBoring.WebHook.Services.Handlers.CallbackQueryHandlers
 {
@@ -19,12 +23,18 @@ namespace NotSoBoring.WebHook.Services.Handlers.CallbackQueryHandlers
         private readonly ITelegramBotClient _botClient;
         private readonly UserService _userService;
         private readonly MatchingEngine _matchingEngine;
+        private readonly ContactService _contactService;
+        private readonly DirectMessageService _directMessageService;
 
-        public CallbackQueryHandler(ITelegramBotClient botClient, UserService userService, MatchingEngine matchingEngine)
+        public CallbackQueryHandler(ITelegramBotClient botClient, UserService userService,
+            MatchingEngine matchingEngine, ContactService contactService,
+            DirectMessageService directMessageService)
         {
             _botClient = botClient;
             _userService = userService;
             _matchingEngine = matchingEngine;
+            _contactService = contactService;
+            _directMessageService = directMessageService;
         }
 
         public Func<Task> HandleCallbackQuery(CallbackQuery callbackQuery, UserState userState)
@@ -45,6 +55,11 @@ namespace NotSoBoring.WebHook.Services.Handlers.CallbackQueryHandlers
                     StringUtils.InlineKeyboard.DontCareGender => async () => await ConnectToAnonymous(callbackQuery),
                     StringUtils.InlineKeyboard.OnlyMales => async () => await ConnectToAnonymous(callbackQuery, GenderTypes.Male),
                     StringUtils.InlineKeyboard.OnlyFemales => async () => await ConnectToAnonymous(callbackQuery, GenderTypes.Female),
+                    StringUtils.InlineKeyboard.MyContacts => async () => await GetMyContacts(callbackQuery),
+                    string s when s.StartsWith(StringUtils.InlineKeyboardCallbackData.SendDirectMessagePrefix) => async () => await SendDirectMessage(callbackQuery),
+                    string s when s.StartsWith(StringUtils.InlineKeyboardCallbackData.ContactsListNextPagePrefix) => async () => await GetMyContacts(callbackQuery),
+                    string s when s.StartsWith(StringUtils.InlineKeyboardCallbackData.AddToContactsPrefix) => async () => await AddToContacts(callbackQuery),
+                    string s when s.StartsWith(StringUtils.InlineKeyboardCallbackData.RemoveFromContactsPrefix) => async () => await RemoveFromContacts(callbackQuery),
                     _ => () => Task.CompletedTask
                 };
             }
@@ -59,6 +74,8 @@ namespace NotSoBoring.WebHook.Services.Handlers.CallbackQueryHandlers
                     StringUtils.InlineKeyboard.EditAge or
                     StringUtils.InlineKeyboard.EditGender or
                     StringUtils.InlineKeyboard.EditProfilePhoto => async () => await CantEditProfile(callbackQuery),
+                    string s when s.StartsWith(StringUtils.InlineKeyboardCallbackData.AddToContactsPrefix) => async () => await CantAddToContacts(callbackQuery),
+                    string s when s.StartsWith(StringUtils.InlineKeyboardCallbackData.RemoveFromContactsPrefix) => async () => await RemoveFromContacts(callbackQuery),
                     _ => () => Task.CompletedTask
                 };
             }
@@ -72,7 +89,7 @@ namespace NotSoBoring.WebHook.Services.Handlers.CallbackQueryHandlers
 
             await _botClient.EditMessageReplyMarkupAsync(chatId: callbackQuery.From.Id,
                                                          messageId: callbackQuery.Message.MessageId,
-                                                         replyMarkup: (InlineKeyboardMarkup) replyMarkup);
+                                                         replyMarkup: (InlineKeyboardMarkup)replyMarkup);
         }
 
         private async Task EditNickname(CallbackQuery callbackQuery)
@@ -80,7 +97,7 @@ namespace NotSoBoring.WebHook.Services.Handlers.CallbackQueryHandlers
             _userService.ChangeUserState(callbackQuery.From.Id, UserState.EditingNickname);
             string text = "لطفا نام مستعار خود را وارد کنید 👇";
 
-            var replyMarkup = ReplyMarkupFactory.GetEditProfileKeyboard();
+            var replyMarkup = ReplyMarkupFactory.GetInOperationKeyboard();
             await _botClient.DeleteMessageAsync(chatId: callbackQuery.From.Id, messageId: callbackQuery.Message.MessageId);
             await _botClient.SendTextMessageAsync(chatId: callbackQuery.From.Id,
                                                   text: text,
@@ -92,7 +109,7 @@ namespace NotSoBoring.WebHook.Services.Handlers.CallbackQueryHandlers
             _userService.ChangeUserState(callbackQuery.From.Id, UserState.EditingAge);
             string text = "لطفا سن خود را وارد کنید 👇";
 
-            var replyMarkup = ReplyMarkupFactory.GetEditProfileKeyboard();
+            var replyMarkup = ReplyMarkupFactory.GetInOperationKeyboard();
             await _botClient.DeleteMessageAsync(chatId: callbackQuery.From.Id, messageId: callbackQuery.Message.MessageId);
             await _botClient.SendTextMessageAsync(chatId: callbackQuery.From.Id,
                                                   text: text,
@@ -104,7 +121,7 @@ namespace NotSoBoring.WebHook.Services.Handlers.CallbackQueryHandlers
             _userService.ChangeUserState(callbackQuery.From.Id, UserState.EditingPhoto);
             string text = "لطفا عکس خود را آپلود کنید 👇";
 
-            var replyMarkup = ReplyMarkupFactory.GetEditProfileKeyboard();
+            var replyMarkup = ReplyMarkupFactory.GetInOperationKeyboard();
             await _botClient.DeleteMessageAsync(chatId: callbackQuery.From.Id, messageId: callbackQuery.Message.MessageId);
             await _botClient.SendTextMessageAsync(chatId: callbackQuery.From.Id,
                                                   text: text,
@@ -123,7 +140,7 @@ namespace NotSoBoring.WebHook.Services.Handlers.CallbackQueryHandlers
                                                   text: text,
                                                   replyMarkup: replyMarkup);
 
-            var replyMarkupKeyboard = ReplyMarkupFactory.GetEditProfileKeyboard();
+            var replyMarkupKeyboard = ReplyMarkupFactory.GetInOperationKeyboard();
             await _botClient.SendTextMessageAsync(chatId: callbackQuery.From.Id,
                                                   text: "",
                                                   replyMarkup: replyMarkupKeyboard);
@@ -165,6 +182,14 @@ namespace NotSoBoring.WebHook.Services.Handlers.CallbackQueryHandlers
                                                       showAlert: true);
         }
 
+        private async Task CantAddToContacts(CallbackQuery callbackQuery)
+        {
+            string text = StringUtils.Errors.CantAddContactsInSession;
+            await _botClient.AnswerCallbackQueryAsync(callbackQueryId: callbackQuery.Id,
+                                                      text: text,
+                                                      showAlert: true);
+        }
+
         private async Task EndSession(CallbackQuery callbackQuery)
         {
             var userId = callbackQuery.From.Id;
@@ -199,10 +224,112 @@ namespace NotSoBoring.WebHook.Services.Handlers.CallbackQueryHandlers
             var userId = callbackQuery.From.Id;
 
             (bool result, string text) = await _matchingEngine.TryAddRequest(new MatchRequest { UserId = userId, PreferredGender = genderPreferrence });
-            
+
             await _botClient.DeleteMessageAsync(chatId: userId, messageId: callbackQuery.Message.MessageId);
             await _botClient.SendTextMessageAsync(chatId: userId,
                                                       text: text);
+        }
+
+        private async Task AddToContacts(CallbackQuery callbackQuery)
+        {
+            var userId = callbackQuery.From.Id;
+
+            if (long.TryParse(StringUtils.InlineKeyboardCallbackData.GetAddToContactsContactId(callbackQuery.Data), out long contactId))
+            {
+                _userService.ChangeUserState(userId, UserState.AddingToContacts);
+                _contactService.AddUserToContactsRequest(userId, contactId);
+
+                var replyMarkup = ReplyMarkupFactory.GetInOperationKeyboard();
+
+                var text = "لطفا یک نام برای شخص موردنظر وارد کنید تا به لیست مخاطبین شما اضافه شود 👇";
+
+                await _botClient.SendTextMessageAsync(chatId: userId,
+                                                      text: text,
+                                                      replyMarkup: replyMarkup);
+            }
+        }
+
+        private async Task RemoveFromContacts(CallbackQuery callbackQuery)
+        {
+            var userId = callbackQuery.From.Id;
+
+            if (long.TryParse(StringUtils.InlineKeyboardCallbackData.GetRemoveFromContactsContactId(callbackQuery.Data), out long contactId))
+            {
+                bool result = await _contactService.RemoveUserFromContacts(userId, contactId);
+                if (result)
+                {
+                    var replyMarkup = ReplyMarkupFactory.GetDefaultKeyboard();
+
+                    var text = "کاربر از لیست مخاطبین شما حذف شد. 👍";
+
+                    await _botClient.DeleteMessageAsync(chatId: userId, messageId: callbackQuery.Message.MessageId);
+                    await _botClient.SendTextMessageAsync(chatId: userId,
+                                                          text: text,
+                                                          replyMarkup: replyMarkup);
+                }
+            }
+        }
+
+        private async Task GetMyContacts(CallbackQuery callbackQuery)
+        {
+            var userId = callbackQuery.From.Id;
+            int pageSize = 10;
+
+            if (!int.TryParse(StringUtils.InlineKeyboardCallbackData.GetContactsListNextPageNumber(callbackQuery.Data), out int pageNumber))
+                pageNumber = 1;
+
+            var contacts = await _contactService.GetUserContacts(userId);
+            contacts = contacts.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
+
+            if (contacts.Count == 0)
+            {
+                string error = StringUtils.Errors.NoMoreResultToShow;
+                await _botClient.AnswerCallbackQueryAsync(callbackQueryId: callbackQuery.Id,
+                                                          text: error,
+                                                          showAlert: true);
+                return;
+            }
+
+            StringBuilder sb = new StringBuilder();
+            sb.Append("لیست مخاطبین شما:");
+            sb.AppendLine();
+
+            foreach (var contact in contacts)
+            {
+                sb.AppendLine("----------------------");
+                var contactInfo = $"{contact.ContactUser.Nickname} ({contact.ContactName})\n" +
+                                  $"🆔: /user_{contact.ContactUser.UniqueId}\n";
+
+                sb.Append(contactInfo);
+            }
+
+            bool hasNextPage = contacts.Count >= pageSize;
+            var replyMarkup = ReplyMarkupFactory.GetContactsListInlineKeyboard(hasNextPage ? pageNumber + 1 : null, pageNumber > 1);
+
+            var text = sb.ToString();
+
+            await _botClient.SendTextMessageAsync(chatId: userId,
+                                                  text: text,
+                                                  replyMarkup: replyMarkup);
+        }
+
+        private async Task SendDirectMessage(CallbackQuery callbackQuery)
+        {
+            var userId = callbackQuery.From.Id;
+
+            if (long.TryParse(StringUtils.InlineKeyboardCallbackData.GetSendDirectMessageTargetUserId(callbackQuery.Data), out long targetUserId))
+            {
+                _userService.ChangeUserState(userId, UserState.SendingDirectMessage);
+                _directMessageService.AddDirectMessageRequest(userId, targetUserId);
+
+                var replyMarkup = ReplyMarkupFactory.GetInOperationKeyboard();
+
+                var text = "لطفا پیغام مورد نظر خود را بنویسید تا برای کاربر ارسال شود 👇";
+
+                await _botClient.SendTextMessageAsync(chatId: userId,
+                                                      text: text,
+                                                      replyMarkup: replyMarkup);
+            }
         }
     }
 }

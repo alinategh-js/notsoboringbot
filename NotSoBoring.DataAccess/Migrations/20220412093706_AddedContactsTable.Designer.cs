@@ -10,8 +10,8 @@ using NotSoBoring.DataAccess;
 namespace NotSoBoring.DataAccess.Migrations
 {
     [DbContext(typeof(MainDbContext))]
-    [Migration("20220328194456_AddContactsTable")]
-    partial class AddContactsTable
+    [Migration("20220412093706_AddedContactsTable")]
+    partial class AddedContactsTable
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -52,7 +52,7 @@ namespace NotSoBoring.DataAccess.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("NotSoBoring.Domain.Models.Contact", b =>
+            modelBuilder.Entity("NotSoBoring.Domain.Models.ApplicationContact", b =>
                 {
                     b.Property<long>("UserId")
                         .HasColumnType("bigint");
@@ -65,26 +65,22 @@ namespace NotSoBoring.DataAccess.Migrations
 
                     b.HasKey("UserId", "ContactId");
 
-                    b.HasIndex("ContactId")
-                        .IsUnique();
-
-                    b.HasIndex("UserId")
-                        .IsUnique();
+                    b.HasIndex("ContactId");
 
                     b.ToTable("Contacts");
                 });
 
-            modelBuilder.Entity("NotSoBoring.Domain.Models.Contact", b =>
+            modelBuilder.Entity("NotSoBoring.Domain.Models.ApplicationContact", b =>
                 {
                     b.HasOne("NotSoBoring.Core.Models.ApplicationUser", "ContactUser")
-                        .WithOne()
-                        .HasForeignKey("NotSoBoring.Domain.Models.Contact", "ContactId")
+                        .WithMany()
+                        .HasForeignKey("ContactId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("NotSoBoring.Core.Models.ApplicationUser", "User")
-                        .WithOne()
-                        .HasForeignKey("NotSoBoring.Domain.Models.Contact", "UserId")
+                        .WithMany()
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 

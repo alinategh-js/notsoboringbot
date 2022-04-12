@@ -8,7 +8,6 @@ using NotSoBoring.Domain.Enums;
 using NotSoBoring.Domain.Utils;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -31,13 +30,6 @@ namespace NotSoBoring.Matchmaking.Users
             _userStates = new ConcurrentDictionary<long, UserState>();
             _usersRecentActivity = new ConcurrentDictionary<long, DateTimeOffset>();
         }
-
-        // static constructor for first initialization of the class
-        //static UserService()
-        //{
-        //    _userStates = new ConcurrentDictionary<long, UserState>();
-        //    _usersRecentActivity = new ConcurrentDictionary<long, DateTimeOffset>();
-        //}
 
         public async Task AddUser(long userId)
         {
@@ -113,7 +105,10 @@ namespace NotSoBoring.Matchmaking.Users
         {
             if(!_memoryCache.TryGetValue(StringUtils.CacheSettings.Keys.UserInfo(userId), out ApplicationUser user))
             {
-                user = await _mainDb.Users.FirstOrDefaultAsync(x => x.Id == userId);
+                user = await _mainDb.Users
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(x => x.Id == userId);
+
                 if (user != null)
                     _memoryCache.Set(StringUtils.CacheSettings.Keys.UserInfo(userId), user);
             }
@@ -123,7 +118,10 @@ namespace NotSoBoring.Matchmaking.Users
 
         public async Task<ApplicationUser> GetUser(string uniqueId)
         {
-            var user = await _mainDb.Users.FirstOrDefaultAsync(x => x.UniqueId == uniqueId);
+            var user = await _mainDb.Users
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.UniqueId == uniqueId);
+
             return user;
         }
 

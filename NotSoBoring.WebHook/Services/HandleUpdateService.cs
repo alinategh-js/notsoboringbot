@@ -1,7 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
-using NotSoBoring.Matchmaking;
 using NotSoBoring.Matchmaking.Users;
-using NotSoBoring.WebHook.Services.Handlers;
 using System;
 using System.Threading.Tasks;
 using Telegram.Bot;
@@ -12,7 +10,6 @@ using NotSoBoring.WebHook.Services.Handlers.MessageHandlers.MessageTypeStrategie
 using NotSoBoring.Domain.Enums;
 using NotSoBoring.WebHook.Services.Handlers.CallbackQueryHandlers;
 using Serilog;
-using NotSoBoring.Domain.Utils;
 using Microsoft.Extensions.Configuration;
 
 namespace NotSoBoring.WebHook.Services

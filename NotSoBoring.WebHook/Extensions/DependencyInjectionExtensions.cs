@@ -18,6 +18,7 @@ namespace NotSoBoring.WebHook.Extensions
             services.AddScoped<GeneralHandler>();
             services.AddScoped<CallbackQueryHandler>();
             services.AddScoped<ContactService>();
+            services.AddScoped<DirectMessageService>();
 
             return services;
         }

@@ -2,7 +2,7 @@
 
 namespace NotSoBoring.DataAccess.Migrations
 {
-    public partial class AddContactsTable : Migration
+    public partial class AddedContactsTable : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -34,14 +34,7 @@ namespace NotSoBoring.DataAccess.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Contacts_ContactId",
                 table: "Contacts",
-                column: "ContactId",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Contacts_UserId",
-                table: "Contacts",
-                column: "UserId",
-                unique: true);
+                column: "ContactId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

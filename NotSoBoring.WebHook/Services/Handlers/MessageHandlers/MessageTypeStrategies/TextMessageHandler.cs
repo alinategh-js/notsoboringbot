@@ -36,11 +36,27 @@ namespace NotSoBoring.WebHook.Services.Handlers.MessageHandlers.MessageTypeStrat
                     _ => async () => await serviceProvider.GetRequiredService<SessionHandler>().SendTextMessage(message)
                 };
             }
+            else if(userState == UserState.AddingToContacts)
+            {
+                action = message.Text switch
+                {
+                    StringUtils.Keyboard.CancelOperation => async () => await serviceProvider.GetRequiredService<CommandHandler>().CancelOperation(message),
+                    _ => async () => await serviceProvider.GetRequiredService<CommandHandler>().CompleteAddToContactsRequest(message)
+                };
+            }
+            else if(userState == UserState.SendingDirectMessage)
+            {
+                action = message.Text switch
+                {
+                    StringUtils.Keyboard.CancelOperation => async () => await serviceProvider.GetRequiredService<CommandHandler>().CancelOperation(message),
+                    _ => async () => await serviceProvider.GetRequiredService<CommandHandler>().CompleteSendDirectMessageRequest(message)
+                };
+            }
             else if (userState > UserState.Edit_Profile_Start && userState < UserState.Edit_Profile_End)
             {
-                if(message.Text == StringUtils.Keyboard.CancelEdit)
+                if(message.Text == StringUtils.Keyboard.CancelOperation)
                 {
-                    action = async () => await serviceProvider.GetRequiredService<CommandHandler>().CancelEditProfile(message);
+                    action = async () => await serviceProvider.GetRequiredService<CommandHandler>().CancelOperation(message);
                 }
                 else
                 {

@@ -11,6 +11,7 @@ using System.ComponentModel.DataAnnotations;
 using NotSoBoring.Domain.Enums;
 using System;
 using NotSoBoring.Core.Models;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace NotSoBoring.WebHook.Services.Handlers.MessageHandlers
 {
@@ -18,16 +19,21 @@ namespace NotSoBoring.WebHook.Services.Handlers.MessageHandlers
     {
         private readonly MatchingEngine _matchingEngine;
         private readonly UserService _userService;
+        private readonly ContactService _contactService;
+        private readonly DirectMessageService _directMessageService;
         private readonly ITelegramBotClient _botClient;
         private readonly IConfiguration _configuration;
 
         public CommandHandler(MatchingEngine matchingEngine, UserService userService, ITelegramBotClient botClient
-            , IConfiguration configuration)
+            , IConfiguration configuration, ContactService contactService, DirectMessageService directMessageService)
         {
             _matchingEngine = matchingEngine;
             _userService = userService;
             _botClient = botClient;
             _configuration = configuration;
+            _contactService = contactService;
+            _directMessageService = directMessageService;
+
         }
 
         public async Task ConnectToAnonymous(Message message)
@@ -95,7 +101,7 @@ namespace NotSoBoring.WebHook.Services.Handlers.MessageHandlers
         public async Task ShowContactProfile(Message message)
         {
             var userId = message.From.Id;
-            if(_matchingEngine.IsUserInSession(userId, out var secondUserId))
+            if (_matchingEngine.IsUserInSession(userId, out var secondUserId))
             {
                 var targetUser = await _userService.GetUser(secondUserId);
                 await ShowProfile(message, targetUser.UniqueId);
@@ -106,9 +112,13 @@ namespace NotSoBoring.WebHook.Services.Handlers.MessageHandlers
         {
             var userId = message.From.Id;
             var user = await _userService.GetUser(userId);
+            bool selfProfile = false;
             ApplicationUser targetUser;
             if (anotherUniqueId == null)
+            {
                 targetUser = user;
+                selfProfile = true;
+            }
             else
             {
                 targetUser = await _userService.GetUser(anotherUniqueId);
@@ -116,7 +126,15 @@ namespace NotSoBoring.WebHook.Services.Handlers.MessageHandlers
 
             if (targetUser != null)
             {
-                var replyMarkup = ReplyMarkupFactory.GetUserProfileInlineKeyboard(anotherUniqueId == user.UniqueId ? null : anotherUniqueId);
+                if(targetUser.Id == userId)
+                    selfProfile = true;
+
+                var isInContacts = false;
+                if (!selfProfile)
+                {
+                    isInContacts = await _contactService.IsUserInContacts(userId, targetUser.Id);
+                }
+                var replyMarkup = ReplyMarkupFactory.GetUserProfileInlineKeyboard(selfProfile, isInContacts: isInContacts, userId: targetUser.Id);
                 string nickname = targetUser.Nickname ?? "❌";
                 string age = targetUser.Age?.ToString() ?? "❌";
                 string gender = targetUser.Gender != null ? targetUser.Gender.GetAttribute<DisplayAttribute>()?.Name : "❌";
@@ -129,7 +147,7 @@ namespace NotSoBoring.WebHook.Services.Handlers.MessageHandlers
 
                 double distance = 0;
                 string distanceString = "نامشخص";
-                if(targetUser != user && targetUser.Latitude.HasValue && targetUser.Longitude.HasValue
+                if (targetUser != user && targetUser.Latitude.HasValue && targetUser.Longitude.HasValue
                     && user.Latitude.HasValue && user.Longitude.HasValue)
                 {
                     distance = Math.Round(LocationUtils.CalculateDistance(targetUser.Latitude.Value, targetUser.Longitude.Value, user.Latitude.Value, user.Longitude.Value));
@@ -220,10 +238,10 @@ namespace NotSoBoring.WebHook.Services.Handlers.MessageHandlers
                                                   replyMarkup: replyMarkup);
         }
 
-        public async Task CancelEditProfile(Message message)
+        public async Task CancelOperation(Message message)
         {
             _userService.ChangeUserState(message.From.Id, UserState.InMenu);
-            string text = "عملیات ویرایش پروفایل لغو شد. 👍";
+            string text = "عملیات لغو شد. 👍";
 
             await _botClient.DeleteMessageAsync(chatId: message.From.Id, messageId: message.MessageId);
 
@@ -231,6 +249,50 @@ namespace NotSoBoring.WebHook.Services.Handlers.MessageHandlers
             await _botClient.SendTextMessageAsync(chatId: message.From.Id,
                                                   text: text,
                                                   replyMarkup: replyMarkup);
+        }
+
+        public async Task CompleteAddToContactsRequest(Message message)
+        {
+            var userId = message.From.Id;
+
+            var contactName = message.Text.Trim();
+
+            if (_contactService.GetContactIdFromRequests(userId, out var contactId))
+            {
+                var text = "";
+                var replyMarkup = ReplyMarkupFactory.GetDefaultKeyboard();
+                _userService.ChangeUserState(message.From.Id, UserState.InMenu);
+                if(await _contactService.AddUserToContacts(userId, contactId, contactName))
+                    text = "کاربر موردنظر با موفقیت به لیست مخاطبین شما اضافه شد. 👍";
+                else
+                    text = "عملیات موردنظر با خطا مواجه شد.";
+
+                await _botClient.SendTextMessageAsync(chatId: userId,
+                                                    text: text,
+                                                    replyMarkup: replyMarkup);
+            }
+        }
+
+        public async Task CompleteSendDirectMessageRequest(Message message)
+        {
+            var userId = message.From.Id;
+
+            var messageText = message.Text.Trim();
+
+            if (_directMessageService.GetTargetUserId(userId, out var targetUserId))
+            {
+                var text = "پیام دایرکت با موفقیت ارسال شد.";
+                var replyMarkup = ReplyMarkupFactory.GetDefaultKeyboard();
+                _userService.ChangeUserState(message.From.Id, UserState.InMenu);
+                var uniqueId = (await _userService.GetUser(userId)).UniqueId;
+
+                await _botClient.SendTextMessageAsync(chatId: targetUserId.Value,
+                                                      text: StringUtils.DirectMessage.DirectMessageText(messageText, uniqueId));
+
+                await _botClient.SendTextMessageAsync(chatId: userId,
+                                                    text: text,
+                                                    replyMarkup: replyMarkup);
+            }
         }
     }
 }

@@ -13,7 +13,7 @@ namespace NotSoBoring.Domain.Utils
             public const string CancelSession = "اتمام چت ❌";
             public const string Profile = "مشاهده پروفایل 👨";
             public const string SendMyLocation = "فرستادن لوکیشن من 📌";
-            public const string CancelEdit = "لغو ویرایش ❌";
+            public const string CancelOperation = "لغو عملیات ❌";
         }
 
         public static class InlineKeyboard
@@ -34,6 +34,48 @@ namespace NotSoBoring.Domain.Utils
             public const string OnlyMales = "فقط پسر 👨";
             public const string OnlyFemales = "فقط دختر 👩";
             public const string DontCareGender = "فرقی نداره 🎲";
+
+            public const string AddToContacts = "اضافه کردن به مخاطبین ➕";
+            public const string RemoveFromContacts = "حذف کردن از مخاطبین ➖";
+            public const string MyContacts = "لیست مخاطبین من 👪";
+
+            public const string NextPage = "صفحه بعد ➡️";
+            public const string PreviousPage = "صفحه قبل ⬅️";
+
+            public const string SendDirectMessage = "ارسال پیام دایرکت ✉️";
+        }
+
+        public static class InlineKeyboardCallbackData
+        {
+            // add to contacts
+            public const string AddToContactsPrefix = "AddToContacts_";
+            public static string AddToContacts(long targetUserId) => $"{AddToContactsPrefix}{targetUserId}";
+            public static string GetAddToContactsContactId(string text) => text.Split("_")?[1];
+
+            // remove from contacts
+            public const string RemoveFromContactsPrefix = "RemoveFromContacts_";
+            public static string RemoveFromContacts(long targetUserId) => $"{RemoveFromContactsPrefix}{targetUserId}";
+            public static string GetRemoveFromContactsContactId(string text) => text.Split("_")?[1];
+
+            // contacts list
+            public const string ContactsListNextPagePrefix = "ContactsListNextPage_";
+            public static string ContactsListNextPage(int pageNumber) => $"{ContactsListNextPagePrefix}{pageNumber}";
+            public static string GetContactsListNextPageNumber(string text) 
+            {
+                try
+                {
+                    return text.Split("_")?[1];
+                }
+                catch
+                {
+                    return null;
+                }
+            }
+
+            // send direct message
+            public const string SendDirectMessagePrefix = "SendDirectMessage_";
+            public static string SendDirectMessage(long targetUserId) => $"{SendDirectMessagePrefix}{targetUserId}";
+            public static string GetSendDirectMessageTargetUserId(string text) => text.Split("_")?[1];
         }
 
         public static class Errors
@@ -41,6 +83,8 @@ namespace NotSoBoring.Domain.Utils
             public const string InvalidInput = "پیامی که فرستادی نامعتبره، دوباره تلاش کن ❌";
             public const string CantEditProfileInSession = "امکان ویرایش پروفایل هنگام چت وجود ندارد ❌";
             public const string ProfileIsNotComplete = "اطلاعات پروفایل شما کامل نیست. لطفا پس از تکمیل پروفایل خود دوباره تلاش کنید.";
+            public const string CantAddContactsInSession = "امکان افزودن مخاطب در هنگام چت وجود ندارد.";
+            public const string NoMoreResultToShow = "نتیجه دیگری برای نمایش وجود ندارد.";
         }
 
         public static class CacheSettings
@@ -50,6 +94,17 @@ namespace NotSoBoring.Domain.Utils
                 public static string UserInfo(long userId) => $"UserInfo_{userId}";
                 public static string UserState(long userId) => $"UserState_{userId}";
                 public static string UserContacts(long userId) => $"UserContacts_{userId}";
+                public static string UserAddingContactId(long userId) => $"UserAddingContactId_{userId}";
+                public static string UserSendingMessageToUserId(long userId) => $"UserSendingMessageToUserId_{userId}";
+            }
+        }
+
+        public static class DirectMessage
+        {
+            public static string DirectMessageText(string text, string uniqueId)
+            {
+                return $"پیام دایرکت از طرف /user_{uniqueId} :\n" + 
+                        text;
             }
         }
 
@@ -60,8 +115,8 @@ namespace NotSoBoring.Domain.Utils
             var timeSpan = currentTime - lastActivity;
             if (timeSpan < OnlineTimeSpan && lastActivity.HasValue)
                 status = "آنلاین ✔️";
-            else 
-            { 
+            else
+            {
                 if (timeSpan == null)
                 {
                     status = "آفلاین ❌";

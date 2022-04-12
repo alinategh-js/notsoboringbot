@@ -1,4 +1,5 @@
 ﻿using NotSoBoring.Domain.Enums;
+using System.Collections.Generic;
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace NotSoBoring.Domain.Utils
@@ -60,20 +61,32 @@ namespace NotSoBoring.Domain.Utils
             };
         }
 
-        public static IReplyMarkup GetUserProfileInlineKeyboard(string uniqueId = null)
+        public static IReplyMarkup GetUserProfileInlineKeyboard(bool selfProfile, bool isInContacts = false, long? userId = null)
         {
             InlineKeyboardMarkup inlineKeyboardMarkup;
-            if (uniqueId == null)
+            if (selfProfile)
             {
                 inlineKeyboardMarkup = new InlineKeyboardMarkup(
                      new[]
                      {
-                    new InlineKeyboardButton[] { StringUtils.InlineKeyboard.EditProfile }
+                        new InlineKeyboardButton[] { StringUtils.InlineKeyboard.MyContacts },
+                        new InlineKeyboardButton[] { StringUtils.InlineKeyboard.EditProfile }
                      });
             }
             else
             {
-                inlineKeyboardMarkup = null; 
+                inlineKeyboardMarkup = new InlineKeyboardMarkup(
+                     new[]
+                     {
+                        new InlineKeyboardButton[]
+                        {
+                            InlineKeyboardButton.WithCallbackData(StringUtils.InlineKeyboard.SendDirectMessage, StringUtils.InlineKeyboardCallbackData.SendDirectMessage(userId.Value)),
+
+                            !isInContacts ?
+                                InlineKeyboardButton.WithCallbackData(StringUtils.InlineKeyboard.AddToContacts, StringUtils.InlineKeyboardCallbackData.AddToContacts(userId.Value))
+                                : InlineKeyboardButton.WithCallbackData(StringUtils.InlineKeyboard.RemoveFromContacts, StringUtils.InlineKeyboardCallbackData.RemoveFromContacts(userId.Value))
+                        }
+                     });
             }
 
             return inlineKeyboardMarkup;
@@ -118,12 +131,12 @@ namespace NotSoBoring.Domain.Utils
             return inlineKeyboardMarkup;
         }
 
-        public static IReplyMarkup GetEditProfileKeyboard()
+        public static IReplyMarkup GetInOperationKeyboard()
         {
             ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup(
                 new[]
                 {
-                    new KeyboardButton[] { StringUtils.Keyboard.CancelEdit }
+                    new KeyboardButton[] { StringUtils.Keyboard.CancelOperation }
                 });
 
             return keyboardMarkup;
@@ -135,7 +148,7 @@ namespace NotSoBoring.Domain.Utils
                 new[]
                 {
                     new KeyboardButton[] { KeyboardButton.WithRequestLocation(StringUtils.Keyboard.SendMyLocation) },
-                    new KeyboardButton[] { StringUtils.Keyboard.CancelEdit }
+                    new KeyboardButton[] { StringUtils.Keyboard.CancelOperation }
                 });
 
             return keyboardMarkup;
@@ -170,6 +183,24 @@ namespace NotSoBoring.Domain.Utils
                             StringUtils.InlineKeyboard.OnlyMales,
                             StringUtils.InlineKeyboard.OnlyFemales,
                         }
+                });
+
+            return inlineKeyboardMarkup;
+        }
+
+        public static IReplyMarkup GetContactsListInlineKeyboard(int? nextPageNumber, bool hasPreviousPage = false)
+        {
+            var buttons = new List<InlineKeyboardButton>();
+            if (nextPageNumber.HasValue)
+                buttons.Add(InlineKeyboardButton.WithCallbackData(StringUtils.InlineKeyboard.NextPage, StringUtils.InlineKeyboardCallbackData.ContactsListNextPage(nextPageNumber.Value)));
+
+            if (hasPreviousPage)
+                buttons.Add(InlineKeyboardButton.WithCallbackData(StringUtils.InlineKeyboard.PreviousPage, StringUtils.InlineKeyboardCallbackData.ContactsListNextPage(nextPageNumber.Value - 2)));
+
+            InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup(
+                new[]
+                {
+                    buttons.ToArray()
                 });
 
             return inlineKeyboardMarkup;

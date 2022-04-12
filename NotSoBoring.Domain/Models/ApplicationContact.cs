@@ -5,12 +5,12 @@ namespace NotSoBoring.Domain.Models
 {
     public class ApplicationContact
     {
-        [ForeignKey("User")]
         public long UserId { get; set; }
+        [ForeignKey("UserId")]
         public ApplicationUser User { get; set; }
 
-        [ForeignKey("ContactUser")]
         public long ContactId { get; set; }
+        [ForeignKey("ContactId")]
         public ApplicationUser ContactUser { get; set; }
 
         public string ContactName { get; set; }

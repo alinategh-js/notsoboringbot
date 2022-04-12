@@ -50,7 +50,7 @@ namespace NotSoBoring.DataAccess.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("NotSoBoring.Domain.Models.Contact", b =>
+            modelBuilder.Entity("NotSoBoring.Domain.Models.ApplicationContact", b =>
                 {
                     b.Property<long>("UserId")
                         .HasColumnType("bigint");
@@ -63,26 +63,22 @@ namespace NotSoBoring.DataAccess.Migrations
 
                     b.HasKey("UserId", "ContactId");
 
-                    b.HasIndex("ContactId")
-                        .IsUnique();
-
-                    b.HasIndex("UserId")
-                        .IsUnique();
+                    b.HasIndex("ContactId");
 
                     b.ToTable("Contacts");
                 });
 
-            modelBuilder.Entity("NotSoBoring.Domain.Models.Contact", b =>
+            modelBuilder.Entity("NotSoBoring.Domain.Models.ApplicationContact", b =>
                 {
                     b.HasOne("NotSoBoring.Core.Models.ApplicationUser", "ContactUser")
-                        .WithOne()
-                        .HasForeignKey("NotSoBoring.Domain.Models.Contact", "ContactId")
+                        .WithMany()
+                        .HasForeignKey("ContactId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("NotSoBoring.Core.Models.ApplicationUser", "User")
-                        .WithOne()
-                        .HasForeignKey("NotSoBoring.Domain.Models.Contact", "UserId")
+                        .WithMany()
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
