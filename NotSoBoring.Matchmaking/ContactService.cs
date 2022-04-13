@@ -30,7 +30,7 @@ namespace NotSoBoring.Matchmaking
 
                 if (contact != null)
                     return false;
-                
+
                 var newContact = new ApplicationContact
                 {
                     UserId = userId,
@@ -95,13 +95,9 @@ namespace NotSoBoring.Matchmaking
             return contacts.Any(x => x.UserId == userId && x.ContactId == contactId);
         }
 
-        public bool AddUserToContactsRequest(long userId, long contactId)
+        public void AddUserToContactsRequest(long userId, long contactId)
         {
-            if (_memoryCache.TryGetValue(StringUtils.CacheSettings.Keys.UserAddingContactId(userId), out long targetContactId))
-                return false;
-
             _memoryCache.Set(StringUtils.CacheSettings.Keys.UserAddingContactId(userId), contactId);
-            return true;
         }
 
         public bool GetContactIdFromRequests(long userId, out long targetContactId)

@@ -15,13 +15,9 @@ namespace NotSoBoring.Matchmaking
             _memoryCache = memoryCache;
         }
 
-        public bool AddDirectMessageRequest(long userId, long targetUserId)
+        public void AddDirectMessageRequest(long userId, long targetUserId)
         {
-            if (_memoryCache.TryGetValue(StringUtils.CacheSettings.Keys.UserSendingMessageToUserId(userId), out long targetUserId2))
-                return false;
-
             _memoryCache.Set(StringUtils.CacheSettings.Keys.UserSendingMessageToUserId(userId), targetUserId);
-            return true;
         }
 
         public bool GetTargetUserId(long userId, out long? targetUserId)

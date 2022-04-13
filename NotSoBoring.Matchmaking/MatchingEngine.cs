@@ -17,6 +17,7 @@ namespace NotSoBoring.Matchmaking
         private readonly CancellationToken _cancellationToken;
         private ConcurrentQueue<MatchRequest> _matchRequests;
         private ConcurrentDictionary<long, long> _matchedSessions;
+        private ConcurrentDictionary<long, long> _recentMatchedSessions;
         private readonly UserService _userService;
 
         public MatchingEngine(CancellationTokenSource cancellationTokenSource, UserService userService, ITelegramBotClient botClient)
@@ -24,6 +25,7 @@ namespace NotSoBoring.Matchmaking
             _botClient = botClient;
             _matchRequests = new ConcurrentQueue<MatchRequest>();
             _matchedSessions = new ConcurrentDictionary<long, long>();
+            _recentMatchedSessions = new ConcurrentDictionary<long, long>();
             _userService = userService;
             _cancellationToken = cancellationTokenSource.Token;
             Task.Factory.StartNew(async () => await Processor(), _cancellationToken, TaskCreationOptions.LongRunning, TaskScheduler.Current);
@@ -69,7 +71,7 @@ namespace NotSoBoring.Matchmaking
 
         public bool TryCancelSession(long userId, out long secondUserId)
         {
-            if(_matchedSessions.TryRemove(userId, out secondUserId) && _matchedSessions.TryRemove(secondUserId, out long firstUserId))
+            if (_matchedSessions.TryRemove(userId, out secondUserId) && _matchedSessions.TryRemove(secondUserId, out long firstUserId))
             {
                 _userService.ChangeUserState(userId, UserState.InMenu);
                 _userService.ChangeUserState(secondUserId, UserState.InMenu);
@@ -109,13 +111,13 @@ namespace NotSoBoring.Matchmaking
 
                     if (_matchedSessions.TryGetValue(firstRequest.UserId, out var secondUserId)) // means user is in a session already
                         continue;
-                    
+
                     // make an array from the requests queue so that it doesn't change until we are done processing firstRequest
                     requestsArray = _matchRequests.ToArray();
                     bool foundMatch = false;
                     foreach (var request in requestsArray)
                     {
-                        if(request.UserId == firstRequest.UserId)
+                        if (request.UserId == firstRequest.UserId)
                         {
                             request.IsCancelled = true;
                             continue;
@@ -123,8 +125,12 @@ namespace NotSoBoring.Matchmaking
 
                         if (await IsMatched(request, firstRequest))
                         {
+                            // matched sessions dictionary
                             _matchedSessions.TryAdd(firstRequest.UserId, request.UserId);
                             _matchedSessions.TryAdd(request.UserId, firstRequest.UserId);
+
+                            AddOrUpdateRecentMatchedSessions(firstRequest.UserId, request.UserId);
+
                             request.IsCancelled = true;
                             _userService.ChangeUserState(firstRequest.UserId, UserState.InSession);
                             _userService.ChangeUserState(request.UserId, UserState.InSession);
@@ -148,6 +154,28 @@ namespace NotSoBoring.Matchmaking
             }
         }
 
+        private void AddOrUpdateRecentMatchedSessions(long firstUserId, long secondUserId)
+        {
+            // recent matched sessions dictionary
+            if (_recentMatchedSessions.TryGetValue(firstUserId, out _))
+            {
+                _recentMatchedSessions[firstUserId] = secondUserId;
+            }
+            else
+            {
+                _recentMatchedSessions.TryAdd(firstUserId, secondUserId);
+            }
+
+            if (_recentMatchedSessions.TryGetValue(secondUserId, out _))
+            {
+                _recentMatchedSessions[secondUserId] = firstUserId;
+            }
+            else
+            {
+                _recentMatchedSessions.TryAdd(secondUserId, firstUserId);
+            }
+        }
+
         private async Task NotifyUsers(long firstUserId, long secondUserId)
         {
             string text = "به یک ناشناس وصل شدی. سلام کن!";
@@ -164,6 +192,10 @@ namespace NotSoBoring.Matchmaking
 
         private async Task<bool> IsMatched(MatchRequest first, MatchRequest second)
         {
+            // checking recent matched sessions
+            if (_recentMatchedSessions.TryGetValue(first.UserId, out long secondUserId) && secondUserId == second.UserId)
+                return false;
+
             // checking cancellation status
             if (first.IsCancelled || second.IsCancelled)
                 return false;
