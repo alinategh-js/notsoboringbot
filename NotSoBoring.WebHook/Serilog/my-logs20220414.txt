@@ -1,0 +1,18 @@
+2022-04-14 09:54:59.083 +04:30 [INF] App initializing
+2022-04-14 10:01:32.931 +04:30 [INF] App initializing
+2022-04-14 10:01:57.125 +04:30 [INF] App initializing
+2022-04-14 10:02:29.555 +04:30 [INF] App initializing
+2022-04-14 10:03:20.258 +04:30 [INF] App initializing
+2022-04-14 10:06:16.638 +04:30 [INF] HandleUpdateService:HandleErrorAsync : Telegram API Error:
+[400]
+Bad Request: replied message not found
+2022-04-14 10:06:38.623 +04:30 [INF] HandleUpdateService:HandleErrorAsync : Telegram API Error:
+[400]
+Bad Request: replied message not found
+2022-04-14 10:07:30.061 +04:30 [INF] HandleUpdateService:HandleErrorAsync : Telegram API Error:
+[400]
+Bad Request: replied message not found
+2022-04-14 10:07:40.806 +04:30 [INF] HandleUpdateService:HandleErrorAsync : Telegram API Error:
+[400]
+Bad Request: replied message not found
+2022-04-14 10:25:20.992 +04:30 [INF] App initializing

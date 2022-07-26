@@ -1,0 +1,4 @@
+2022-04-11 00:19:46.492 +04:30 [INF] App initializing
+2022-04-11 00:25:56.168 +04:30 [INF] App initializing
+2022-04-11 00:28:06.621 +04:30 [INF] App initializing
+2022-04-11 00:31:24.545 +04:30 [INF] App initializing

@@ -1,0 +1,84 @@
+2022-04-12 13:36:21.820 +04:30 [INF] App initializing
+2022-04-12 13:41:55.824 +04:30 [INF] App initializing
+2022-04-12 13:50:35.177 +04:30 [INF] App initializing
+2022-04-12 13:53:48.671 +04:30 [INF] App initializing
+2022-04-12 13:54:10.875 +04:30 [INF] App initializing
+2022-04-12 13:56:14.470 +04:30 [INF] App initializing
+2022-04-12 13:56:30.507 +04:30 [INF] App initializing
+2022-04-12 13:59:49.636 +04:30 [INF] App initializing
+2022-04-12 13:59:55.841 +04:30 [INF] App initializing
+2022-04-12 14:06:59.633 +04:30 [INF] App initializing
+2022-04-12 14:07:05.266 +04:30 [INF] App initializing
+2022-04-12 14:07:22.083 +04:30 [INF] App initializing
+2022-04-12 14:09:08.371 +04:30 [INF] App initializing
+2022-04-12 14:58:50.073 +04:30 [INF] App initializing
+2022-04-12 15:00:10.625 +04:30 [INF] App initializing
+2022-04-12 15:38:15.787 +04:30 [INF] App initializing
+2022-04-12 15:52:08.267 +04:30 [INF] App initializing
+2022-04-12 15:53:07.892 +04:30 [INF] App initializing
+2022-04-12 15:53:50.516 +04:30 [INF] App initializing
+2022-04-12 16:22:46.543 +04:30 [INF] App initializing
+2022-04-12 17:23:29.065 +04:30 [INF] App initializing
+2022-04-12 17:24:37.442 +04:30 [INF] App initializing
+2022-04-12 17:24:55.810 +04:30 [INF] App initializing
+2022-04-12 17:52:28.482 +04:30 [INF] App initializing
+2022-04-12 17:53:24.217 +04:30 [INF] App initializing
+2022-04-12 17:53:54.039 +04:30 [INF] HandleUpdateService:HandleErrorAsync : System.IndexOutOfRangeException: Index was outside the bounds of the array.
+   at NotSoBoring.Domain.Utils.StringUtils.InlineKeyboardCallbackData.GetContactsListNextPageNumber(String text) in D:\NotSoBoringBot project\NotSoBoringBot\NotSoBoring.Domain\Utils\StringUtils.cs:line 61
+   at NotSoBoring.WebHook.Services.Handlers.CallbackQueryHandlers.CallbackQueryHandler.GetMyContacts(CallbackQuery callbackQuery) in D:\NotSoBoringBot project\NotSoBoringBot\NotSoBoring.WebHook\Services\Handlers\CallbackQueryHandlers\CallbackQueryHandler.cs:line 273
+   at NotSoBoring.WebHook.Services.Handlers.CallbackQueryHandlers.CallbackQueryHandler.<>c__DisplayClass5_0.<<HandleCallbackQuery>b__11>d.MoveNext() in D:\NotSoBoringBot project\NotSoBoringBot\NotSoBoring.WebHook\Services\Handlers\CallbackQueryHandlers\CallbackQueryHandler.cs:line 54
+--- End of stack trace from previous location ---
+   at NotSoBoring.WebHook.Services.HandleUpdateService.BotOnCallbackQueryReceived(CallbackQuery callbackQuery) in D:\NotSoBoringBot project\NotSoBoringBot\NotSoBoring.WebHook\Services\HandleUpdateService.cs:line 81
+   at NotSoBoring.WebHook.Services.HandleUpdateService.<>c__DisplayClass7_0.<<EchoAsync>b__1>d.MoveNext() in D:\NotSoBoringBot project\NotSoBoringBot\NotSoBoring.WebHook\Services\HandleUpdateService.cs:line 44
+--- End of stack trace from previous location ---
+   at NotSoBoring.WebHook.Services.HandleUpdateService.EchoAsync(Update update) in D:\NotSoBoringBot project\NotSoBoringBot\NotSoBoring.WebHook\Services\HandleUpdateService.cs:line 50
+2022-04-12 17:54:24.917 +04:30 [INF] HandleUpdateService:HandleErrorAsync : System.IndexOutOfRangeException: Index was outside the bounds of the array.
+   at NotSoBoring.Domain.Utils.StringUtils.InlineKeyboardCallbackData.GetContactsListNextPageNumber(String text) in D:\NotSoBoringBot project\NotSoBoringBot\NotSoBoring.Domain\Utils\StringUtils.cs:line 61
+   at NotSoBoring.WebHook.Services.Handlers.CallbackQueryHandlers.CallbackQueryHandler.GetMyContacts(CallbackQuery callbackQuery) in D:\NotSoBoringBot project\NotSoBoringBot\NotSoBoring.WebHook\Services\Handlers\CallbackQueryHandlers\CallbackQueryHandler.cs:line 273
+   at NotSoBoring.WebHook.Services.Handlers.CallbackQueryHandlers.CallbackQueryHandler.<>c__DisplayClass5_0.<<HandleCallbackQuery>b__11>d.MoveNext() in D:\NotSoBoringBot project\NotSoBoringBot\NotSoBoring.WebHook\Services\Handlers\CallbackQueryHandlers\CallbackQueryHandler.cs:line 54
+--- End of stack trace from previous location ---
+   at NotSoBoring.WebHook.Services.HandleUpdateService.BotOnCallbackQueryReceived(CallbackQuery callbackQuery) in D:\NotSoBoringBot project\NotSoBoringBot\NotSoBoring.WebHook\Services\HandleUpdateService.cs:line 81
+   at NotSoBoring.WebHook.Services.HandleUpdateService.<>c__DisplayClass7_0.<<EchoAsync>b__1>d.MoveNext() in D:\NotSoBoringBot project\NotSoBoringBot\NotSoBoring.WebHook\Services\HandleUpdateService.cs:line 44
+--- End of stack trace from previous location ---
+   at NotSoBoring.WebHook.Services.HandleUpdateService.EchoAsync(Update update) in D:\NotSoBoringBot project\NotSoBoringBot\NotSoBoring.WebHook\Services\HandleUpdateService.cs:line 50
+2022-04-12 17:56:07.257 +04:30 [INF] App initializing
+2022-04-12 17:56:23.847 +04:30 [INF] HandleUpdateService:HandleErrorAsync : System.IndexOutOfRangeException: Index was outside the bounds of the array.
+   at NotSoBoring.Domain.Utils.StringUtils.InlineKeyboardCallbackData.GetContactsListNextPageNumber(String text) in D:\NotSoBoringBot project\NotSoBoringBot\NotSoBoring.Domain\Utils\StringUtils.cs:line 63
+   at NotSoBoring.WebHook.Services.Handlers.CallbackQueryHandlers.CallbackQueryHandler.GetMyContacts(CallbackQuery callbackQuery) in D:\NotSoBoringBot project\NotSoBoringBot\NotSoBoring.WebHook\Services\Handlers\CallbackQueryHandlers\CallbackQueryHandler.cs:line 273
+   at NotSoBoring.WebHook.Services.Handlers.CallbackQueryHandlers.CallbackQueryHandler.<>c__DisplayClass5_0.<<HandleCallbackQuery>b__11>d.MoveNext() in D:\NotSoBoringBot project\NotSoBoringBot\NotSoBoring.WebHook\Services\Handlers\CallbackQueryHandlers\CallbackQueryHandler.cs:line 54
+--- End of stack trace from previous location ---
+   at NotSoBoring.WebHook.Services.HandleUpdateService.BotOnCallbackQueryReceived(CallbackQuery callbackQuery) in D:\NotSoBoringBot project\NotSoBoringBot\NotSoBoring.WebHook\Services\HandleUpdateService.cs:line 81
+   at NotSoBoring.WebHook.Services.HandleUpdateService.<>c__DisplayClass7_0.<<EchoAsync>b__1>d.MoveNext() in D:\NotSoBoringBot project\NotSoBoringBot\NotSoBoring.WebHook\Services\HandleUpdateService.cs:line 44
+--- End of stack trace from previous location ---
+   at NotSoBoring.WebHook.Services.HandleUpdateService.EchoAsync(Update update) in D:\NotSoBoringBot project\NotSoBoringBot\NotSoBoring.WebHook\Services\HandleUpdateService.cs:line 50
+2022-04-12 17:57:38.274 +04:30 [INF] App initializing
+2022-04-12 17:59:33.479 +04:30 [INF] App initializing
+2022-04-12 17:59:45.086 +04:30 [INF] HandleUpdateService:HandleErrorAsync : Telegram API Error:
+[400]
+Bad Request: can't parse inline keyboard button: InlineKeyboardButton must be an Object
+2022-04-12 17:59:55.951 +04:30 [INF] HandleUpdateService:HandleErrorAsync : Telegram API Error:
+[400]
+Bad Request: can't parse inline keyboard button: InlineKeyboardButton must be an Object
+2022-04-12 18:00:01.142 +04:30 [INF] HandleUpdateService:HandleErrorAsync : Telegram API Error:
+[400]
+Bad Request: can't parse inline keyboard button: InlineKeyboardButton must be an Object
+2022-04-12 18:00:47.787 +04:30 [INF] HandleUpdateService:HandleErrorAsync : Telegram API Error:
+[400]
+Bad Request: can't parse inline keyboard button: InlineKeyboardButton must be an Object
+2022-04-12 18:01:47.865 +04:30 [INF] HandleUpdateService:HandleErrorAsync : Telegram API Error:
+[400]
+Bad Request: can't parse inline keyboard button: InlineKeyboardButton must be an Object
+2022-04-12 18:04:50.142 +04:30 [INF] App initializing
+2022-04-12 18:05:00.512 +04:30 [INF] HandleUpdateService:HandleErrorAsync : Telegram API Error:
+[400]
+Bad Request: can't parse inline keyboard button: InlineKeyboardButton must be an Object
+2022-04-12 18:05:46.069 +04:30 [INF] App initializing
+2022-04-12 18:12:55.377 +04:30 [INF] App initializing
+2022-04-12 18:14:28.983 +04:30 [INF] App initializing
+2022-04-12 18:28:46.005 +04:30 [INF] App initializing
+2022-04-12 18:30:39.702 +04:30 [INF] App initializing
+2022-04-12 18:31:10.716 +04:30 [INF] App initializing
+2022-04-12 19:24:31.114 +04:30 [INF] App initializing
+2022-04-12 19:26:29.400 +04:30 [INF] App initializing
+2022-04-12 19:27:57.887 +04:30 [INF] App initializing
+2022-04-12 20:27:01.717 +04:30 [INF] App initializing
