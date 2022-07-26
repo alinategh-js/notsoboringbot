@@ -66,5 +66,15 @@ namespace NotSoBoring.WebHook.Services.Handlers.MessageHandlers
                                                       longitude: message.Location.Longitude);
             }
         }
+
+        public async Task SendVideoMessage(Message message)
+        {
+            var userId = message.From.Id;
+            if (_matchingEngine.IsUserInSession(userId, out var secondUserId))
+            {
+                await _botClient.SendVideoAsync(chatId: secondUserId,
+                                                      video: message.Video.FileId);
+            }
+        }
     }
 }

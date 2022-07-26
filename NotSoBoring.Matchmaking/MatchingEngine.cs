@@ -42,17 +42,17 @@ namespace NotSoBoring.Matchmaking
 
             if (_matchRequests.Any(x => x.UserId == request.UserId && !x.IsCancelled))
             {
-                var reason = "شما کمی پیش درخواست دادید، لطفا کمی صبر کنید تا به یک نفر متصل شوید.\n\n" +
-                    "در غیر اینصورت میتوانید درخواست خود را با /cancel لغو کنید.";
+                var reason = "You have requested recently, please wait to connect to someone.\n\n" +
+                    "You can use /cancel in order to cancel the request.";
                 return (false, reason);
             }
 
             if (IsUserInSession(request.UserId))
-                return (false, "شما در حال حاضر در حال چت میباشید.");
+                return (false, "You are already in a chat.");
 
             _matchRequests.Enqueue(request);
             _userService.ChangeUserState(request.UserId, UserState.WaitingForMatch);
-            var text = "منتظر باش تا به یکی وصلت کنم 🕐 ";
+            var text = "Looking for someone to connect... 🕐 ";
             return (true, text);
         }
 
@@ -178,7 +178,7 @@ namespace NotSoBoring.Matchmaking
 
         private async Task NotifyUsers(long firstUserId, long secondUserId)
         {
-            string text = "به یک ناشناس وصل شدی. سلام کن!";
+            string text = "You are now connected to someone, say Hi!";
             var replyMarkup = ReplyMarkupFactory.GetInSessionKeyboard();
 
             await _botClient.SendTextMessageAsync(chatId: firstUserId,

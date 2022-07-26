@@ -7,42 +7,42 @@ namespace NotSoBoring.Domain.Utils
         private static TimeSpan OnlineTimeSpan = TimeSpan.FromMinutes(2);
         public static class Keyboard
         {
-            public const string ConnectMeToAnAnonymous = "به یه ناشناس وصلم کن! 🎲";
-            public const string CancelRequest = "لغو درخواست ❌";
-            public const string SeeContactProfile = "مشاهده پروفایل مخاطب 📖";
-            public const string CancelSession = "اتمام چت ❌";
-            public const string Profile = "مشاهده پروفایل 👨";
-            public const string SendMyLocation = "فرستادن لوکیشن من 📌";
-            public const string CancelOperation = "لغو عملیات ❌";
+            public const string ConnectMeToAnAnonymous = "Connect to random person! 🎲";
+            public const string CancelRequest = "Cancel request ❌";
+            public const string SeeContactProfile = "See contact profile 📖";
+            public const string CancelSession = "End chat ❌";
+            public const string Profile = "My profile 👨";
+            public const string SendMyLocation = "Send my location 📌";
+            public const string CancelOperation = "Cancel operation ❌";
         }
 
         public static class InlineKeyboard
         {
-            public const string EditProfile = "ویرایش اطلاعات پروفایل 📝";
-            public const string EditNickname = "نام مستعار 📝";
-            public const string EditGender = "جنسیت 📝";
-            public const string EditAge = "سن 📝";
-            public const string EditProfilePhoto = "عکس 📝";
-            public const string EditLocation = "لوکیشن 📌";
+            public const string EditProfile = "Edit profile 📝";
+            public const string EditNickname = "Nickname 📝";
+            public const string EditGender = "Gender 📝";
+            public const string EditAge = "Age 📝";
+            public const string EditProfilePhoto = "Photo 📝";
+            public const string EditLocation = "Location 📌";
 
-            public const string Male = "پسر 👨";
-            public const string Female = "دختر 👩";
+            public const string Male = "Male 👨";
+            public const string Female = "Female 👩";
 
-            public const string EndChat = "اتمام چت ❌";
-            public const string ContinueChat = "ادامه چت ✔️";
+            public const string EndChat = "End chat ❌";
+            public const string ContinueChat = "Continue chat ✔️";
 
-            public const string OnlyMales = "فقط پسر 👨";
-            public const string OnlyFemales = "فقط دختر 👩";
-            public const string DontCareGender = "فرقی نداره 🎲";
+            public const string OnlyMales = "Only males 👨";
+            public const string OnlyFemales = "Only females 👩";
+            public const string DontCareGender = "Either one 🎲";
 
-            public const string AddToContacts = "اضافه کردن به مخاطبین ➕";
-            public const string RemoveFromContacts = "حذف کردن از مخاطبین ➖";
-            public const string MyContacts = "لیست مخاطبین من 👪";
+            public const string AddToContacts = "Add to contacts ➕";
+            public const string RemoveFromContacts = "Remove from contacts ➖";
+            public const string MyContacts = "My contacts 👪";
 
-            public const string NextPage = "صفحه بعد ➡️";
-            public const string PreviousPage = "صفحه قبل ⬅️";
+            public const string NextPage = "Next page ➡️";
+            public const string PreviousPage = "Previous page ⬅️";
 
-            public const string SendDirectMessage = "ارسال پیام دایرکت ✉️";
+            public const string SendDirectMessage = "Send direct message ✉️";
         }
 
         public static class InlineKeyboardCallbackData
@@ -80,11 +80,11 @@ namespace NotSoBoring.Domain.Utils
 
         public static class Errors
         {
-            public const string InvalidInput = "پیامی که فرستادی نامعتبره، دوباره تلاش کن ❌";
-            public const string CantEditProfileInSession = "امکان ویرایش پروفایل هنگام چت وجود ندارد ❌";
-            public const string ProfileIsNotComplete = "اطلاعات پروفایل شما کامل نیست. لطفا پس از تکمیل پروفایل خود دوباره تلاش کنید.";
-            public const string CantAddContactsInSession = "امکان افزودن مخاطب در هنگام چت وجود ندارد.";
-            public const string NoMoreResultToShow = "نتیجه دیگری برای نمایش وجود ندارد.";
+            public const string InvalidInput = "Invalid input, try again ❌";
+            public const string CantEditProfileInSession = "You can't edit your profile while in chat ❌";
+            public const string ProfileIsNotComplete = "You need to complete your profile info before doing that.";
+            public const string CantAddContactsInSession = "You can't add contacts while in chat.";
+            public const string NoMoreResultToShow = "No more results to show.";
         }
 
         public static class CacheSettings
@@ -103,7 +103,7 @@ namespace NotSoBoring.Domain.Utils
         {
             public static string DirectMessageText(string text, string uniqueId)
             {
-                return $"پیام دایرکت از طرف /user_{uniqueId} :\n" + 
+                return $"Direct message from: /user_{uniqueId} :\n" + 
                         text;
             }
         }
@@ -114,23 +114,23 @@ namespace NotSoBoring.Domain.Utils
             string status = "";
             var timeSpan = currentTime - lastActivity;
             if (timeSpan < OnlineTimeSpan && lastActivity.HasValue)
-                status = "آنلاین ✔️";
+                status = "Online ✔️";
             else
             {
                 if (timeSpan == null)
                 {
-                    status = "آفلاین ❌";
+                    status = "Offline ❌";
                 }
                 else
                 {
                     string timeSpanString = timeSpan.Value.ToReadableString();
-                    status = $"({timeSpanString} پیش آنلاین بوده)";
+                    status = $"(Last seen {timeSpanString} ago)";
                 }
             }
 
             if (isInSession)
             {
-                status = status + " (در حال چت کردن 🗣)";
+                status = status + " (In Chat 🗣)";
             }
 
             return status;

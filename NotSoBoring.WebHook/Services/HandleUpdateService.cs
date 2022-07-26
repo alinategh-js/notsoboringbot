@@ -84,8 +84,8 @@ namespace NotSoBoring.WebHook.Services
         private async Task<(bool, UserState)> CheckUser(long userId)
         {
             // check if user is a member of our channel
-            string shouldJoinChannel = "برای استفاده از ربات باید عضو کانال ما باشید. \n\n"
-                                     + $"آیدی چنل : 👈 {_botConfig.TelegramChannel}";
+            string shouldJoinChannel = "You have to join our channel in order to use the bot \n\n"
+                                     + $"Channel's ID: 👈 {_botConfig.TelegramChannel}";
 
             try
             {

@@ -16,8 +16,8 @@ namespace NotSoBoring.WebHook.Services.Handlers.MessageHandlers
 
         public async Task<Message> Usage(Message message)
         {
-            const string usage = "نگرفتم چی گفتی 🤔\n\n" +
-                                 "از منوی پایین میتونی انتخاب کنی تا کمکت کنم 👇";
+            const string usage = "I don't get it 🤔\n\n" +
+                                 "You can choose from the menu in the bottom 👇";
 
             var replyMarkup = ReplyMarkupFactory.GetDefaultKeyboard();
 

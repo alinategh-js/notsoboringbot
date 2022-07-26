@@ -14,6 +14,7 @@ namespace NotSoBoring.WebHook.Services.Handlers.MessageHandlers.MessageTypeStrat
                 MessageType.Voice => new VoiceMessageHandler(),
                 MessageType.Photo => new PhotoMessageHandler(),
                 MessageType.Location => new LocationMessageHandler(),
+                MessageType.Video => new VideoMessageHandler(),
                 _ => new NoActionMessageHandler()
             };
         }

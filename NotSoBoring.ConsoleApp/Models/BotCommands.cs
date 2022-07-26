@@ -7,8 +7,8 @@ namespace NotSoBoring.ConsoleApp.Models
     {
         private static readonly Dictionary<string, string> _commands = new Dictionary<string, string>()
         {
-            {"پروفایل کاربری 🧑‍💻", "profile" },
-            {"لیست مخاطبین 📖", "contacts" },
+            {"Profile 🧑‍💻", "profile" },
+            {"Contacts 📖", "contacts" },
         };
 
         public static IEnumerable<KeyValuePair<string, string>> Commands => _commands.ToList();

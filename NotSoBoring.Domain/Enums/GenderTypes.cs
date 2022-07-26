@@ -7,10 +7,10 @@ namespace NotSoBoring.Core.Enums
 {
     public enum GenderTypes : byte
     {
-        [Display(Name = "زن")]
+        [Display(Name = "Female")]
         Female = 0,
 
-        [Display(Name = "مرد")]
+        [Display(Name = "Male")]
         Male = 1
     }
 }

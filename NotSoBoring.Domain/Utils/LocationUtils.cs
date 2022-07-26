@@ -29,8 +29,8 @@ namespace NotSoBoring.Domain.Utils
         public static string DistanceToString(double distance)
         {
             if (distance < 1)
-                return "کمتر از 1km";
-            else return $"تقریبا {distance}km";
+                return "Less than 1km";
+            else return $"Approximately {distance}km";
         }
     }
 }

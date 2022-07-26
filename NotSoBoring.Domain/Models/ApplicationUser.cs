@@ -12,13 +12,13 @@ namespace NotSoBoring.Core.Models
 
         public string UniqueId { get; set; }
 
-        [Display(Name = "نام مستعار")]
+        [Display(Name = "Nickname")]
         public string Nickname { get; set; }
-        [Display(Name = "سن")]
+        [Display(Name = "Age")]
         public int? Age { get; set; }
-        [Display(Name = "جنسیت")]
+        [Display(Name = "Gender")]
         public GenderTypes? Gender { get; set; }
-        [Display(Name = "عکس")]
+        [Display(Name = "Photo")]
         public string Photo { get; set; } // file_id of telegram servers
 
         public double? Latitude { get; set; }

@@ -42,7 +42,7 @@ namespace NotSoBoring.WebHook.Services.Handlers.MessageHandlers
             if (_matchingEngine.IsUserInSession(userId))
                 return;
 
-            string text = "دوست داری به چه کسی وصلت کنم؟";
+            string text = "Who would you like to connect to?";
             var replyMarkup = ReplyMarkupFactory.GetChooseChatPreferrenceInlineKeyboard();
 
             await _botClient.SendTextMessageAsync(chatId: userId,
@@ -61,11 +61,11 @@ namespace NotSoBoring.WebHook.Services.Handlers.MessageHandlers
             var replyMarkup = ReplyMarkupFactory.GetDefaultKeyboard();
             if (_matchingEngine.TryCancelRequest(userId))
             {
-                text = "درخواستی که داده بودی لغو شد.";
+                text = "Your request was cancelled.";
             }
             else
             {
-                text = "شما درخواست فعالی ندارید.";
+                text = "You don't have any active requests.";
             }
 
             await _botClient.SendTextMessageAsync(chatId: message.Chat.Id,
@@ -77,10 +77,10 @@ namespace NotSoBoring.WebHook.Services.Handlers.MessageHandlers
         public async Task CancelSession(Message message)
         {
             var userId = message.From.Id;
-            string text = "شما در حال حاضر چت فعال ندارید.";
+            string text = "You don't have an active chat at the moment.";
             if (_matchingEngine.IsUserInSession(userId))
             {
-                text = "مطمئنی که میخوای چت رو تموم کنی؟ ❔";
+                text = "Are you sure you want to end the chat؟ ❔";
 
                 var replyMarkup = ReplyMarkupFactory.GetEndSessionInlineKeyboard();
 
@@ -146,7 +146,7 @@ namespace NotSoBoring.WebHook.Services.Handlers.MessageHandlers
                 string onlineStatus = StringUtils.GetUserOnlineStatus(lastActivity, isInSession);
 
                 double distance = 0;
-                string distanceString = "نامشخص";
+                string distanceString = "Unknown";
                 if (targetUser != user && targetUser.Latitude.HasValue && targetUser.Longitude.HasValue
                     && user.Latitude.HasValue && user.Longitude.HasValue)
                 {
@@ -154,11 +154,11 @@ namespace NotSoBoring.WebHook.Services.Handlers.MessageHandlers
                     distanceString = LocationUtils.DistanceToString(distance);
                 }
                 bool showDistance = user != targetUser;
-                string distanceFinalString = showDistance ? $"فاصله: {distanceString}\n\n" : string.Empty;
-                string caption = $"نام مستعار: {nickname}\n"
-                                 + $"جنسیت: {gender}\n"
-                                 + $"سن: {age}\n\n"
-                                 + $"وضعیت: {onlineStatus}\n\n"
+                string distanceFinalString = showDistance ? $"Distance: {distanceString}\n\n" : string.Empty;
+                string caption = $"Nickname: {nickname}\n"
+                                 + $"Gender: {gender}\n"
+                                 + $"Age: {age}\n\n"
+                                 + $"Status: {onlineStatus}\n\n"
                                  + distanceFinalString
                                  + $"🆔: /user_{uniqueId}";
 
@@ -177,7 +177,7 @@ namespace NotSoBoring.WebHook.Services.Handlers.MessageHandlers
             await _userService.EditUserNickname(userId, newNickname);
             _userService.ChangeUserState(userId, UserState.InMenu);
 
-            string text = $"نام مستعار شما با موفقیت به \"{newNickname}\" تغییر یافت ✔️";
+            string text = $"Your nickname was changed to \"{newNickname}\" ✔️";
             var replyMarkup = ReplyMarkupFactory.GetDefaultKeyboard();
             await _botClient.SendTextMessageAsync(chatId: userId,
                                                   text: text,
@@ -189,7 +189,7 @@ namespace NotSoBoring.WebHook.Services.Handlers.MessageHandlers
             string text = "";
             if (!int.TryParse(message.Text.Trim(), out int newAge) || newAge > 99 || newAge < 1)
             {
-                text = "لطفا عددی بین 1 تا 99 وارد کنید (کاراکتر های انگلیسی)";
+                text = "Please enter a number between 1 and 99";
                 await _botClient.SendTextMessageAsync(chatId: message.From.Id,
                                                   text: text);
                 return;
@@ -199,7 +199,7 @@ namespace NotSoBoring.WebHook.Services.Handlers.MessageHandlers
             await _userService.EditAge(userId, newAge);
             _userService.ChangeUserState(userId, UserState.InMenu);
 
-            text = $"سن شما با موفقیت به \"{newAge}\" تغییر یافت ✔️";
+            text = $"Your age was changed to \"{newAge}\" ✔️";
             var replyMarkup = ReplyMarkupFactory.GetDefaultKeyboard();
             await _botClient.SendTextMessageAsync(chatId: userId,
                                                   text: text,
@@ -215,7 +215,7 @@ namespace NotSoBoring.WebHook.Services.Handlers.MessageHandlers
             await _userService.EditPhoto(userId, message.Photo[0].FileId);
             _userService.ChangeUserState(userId, UserState.InMenu);
 
-            string text = "عکس پروفایل شما با موفقیت تغییر یافت ✔️";
+            string text = "Your profile photo was successfully changed ✔️";
             var replyMarkup = ReplyMarkupFactory.GetDefaultKeyboard();
             await _botClient.SendTextMessageAsync(chatId: userId,
                                                   text: text,
@@ -231,7 +231,7 @@ namespace NotSoBoring.WebHook.Services.Handlers.MessageHandlers
             await _userService.EditLocation(userId, message.Location.Latitude, message.Location.Longitude);
             _userService.ChangeUserState(userId, UserState.InMenu);
 
-            string text = "موقعیت مکانی شما با موفقیت تغییر یافت ✔️";
+            string text = "Your location was successfully changed ✔️";
             var replyMarkup = ReplyMarkupFactory.GetDefaultKeyboard();
             await _botClient.SendTextMessageAsync(chatId: userId,
                                                   text: text,
@@ -241,7 +241,7 @@ namespace NotSoBoring.WebHook.Services.Handlers.MessageHandlers
         public async Task CancelOperation(Message message)
         {
             _userService.ChangeUserState(message.From.Id, UserState.InMenu);
-            string text = "عملیات لغو شد. 👍";
+            string text = "Operation is cancelled 👍";
 
             await _botClient.DeleteMessageAsync(chatId: message.From.Id, messageId: message.MessageId);
 
@@ -263,9 +263,9 @@ namespace NotSoBoring.WebHook.Services.Handlers.MessageHandlers
                 var replyMarkup = ReplyMarkupFactory.GetDefaultKeyboard();
                 _userService.ChangeUserState(message.From.Id, UserState.InMenu);
                 if(await _contactService.AddUserToContacts(userId, contactId, contactName))
-                    text = "کاربر موردنظر با موفقیت به لیست مخاطبین شما اضافه شد. 👍";
+                    text = "User was successfully added to your contacts 👍";
                 else
-                    text = "عملیات موردنظر با خطا مواجه شد.";
+                    text = "Something went wrong.";
 
                 await _botClient.SendTextMessageAsync(chatId: userId,
                                                     text: text,
@@ -281,7 +281,7 @@ namespace NotSoBoring.WebHook.Services.Handlers.MessageHandlers
 
             if (_directMessageService.GetTargetUserId(userId, out var targetUserId))
             {
-                var text = "پیام دایرکت با موفقیت ارسال شد.";
+                var text = "Direct message was successfully sent to the user.";
                 var replyMarkup = ReplyMarkupFactory.GetDefaultKeyboard();
                 _userService.ChangeUserState(message.From.Id, UserState.InMenu);
                 var uniqueId = (await _userService.GetUser(userId)).UniqueId;
