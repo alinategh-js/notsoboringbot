@@ -17,7 +17,16 @@ These instructions will get you a copy of the project up and running on your loc
 First thing you need to do is to create a Telegram bot using [BotFather](https://core.telegram.org/bots#6-botfather). After creating one, your bot will have a **Token** which you need to keep secured because that token is used to control your bot.
 
 #### Create a Telegram channel (optional)
+There is a feature in this bot that is optional. You can create a Telegram channel if you want and require your users to be a member of that channel in order to use the bot. If you don't know what a Telegram channel is check out [Channels FAQ](https://telegram.org/faq_channels) to learn more.
 
+#### Setup ngrok
+[ngrok](https://ngrok.com/) exposes local networked services behinds NATs and firewalls to the public internet over a secure tunnel. Share local websites, build/test webhook consumers and self-host personal services.
+<br />
+In order to use ngrok for development of our bot, you need to download and install it first from [here](https://ngrok.com/download). After you're done with the installation you run this command on your cmd:
+```bash
+ngrok http [PORT_NUMBER]
+```
+replace [PORT_NUMBER] with the port number of your bot application after you run it locally (described below).
 
 #### Clone the Repo
 ```bash
@@ -31,10 +40,11 @@ Now you need to open the solution file in Visual Studio. From the Solution Explo
     "BotToken": "your-telegram-bot-token",
     "HostAddress": "https://your-ngrok-path.ngrok.io",
     "CertificatePublicKeyPath": "", // ignore this
-    "TelegramChannel": "@your-channel-id"
+    "TelegramChannel": "@your-channel-id-if-any"
 },
 ```
-
+You can leave the TelegramChannel as an empty string if you don't want to have a channel.
+Now build and run the project in Debug mode and try to send a text to your bot on your Telegram app to see it work.
 
 ## Documentation
 If you want to learn more about the architecture and how the code works, make sure to check out the [Wiki](https://github.com/alinategh-js/notsoboringbot/wiki) page of this repo.
