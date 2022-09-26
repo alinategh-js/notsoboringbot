@@ -28,6 +28,9 @@ ngrok http [PORT_NUMBER]
 ```
 replace [PORT_NUMBER] with the port number of your bot application after you run it locally (described below).
 
+#### Setup SQL Server
+You need to have [Microsoft SQL Server](https://www.microsoft.com/en-us/sql-server/sql-server-downloads) on your system and create a Database called "NotSoBoringBot". The database is used to save bot users profile data.
+
 #### Clone the Repo
 ```bash
 git clone https://github.com/alinategh-js/notsoboringbot.git
