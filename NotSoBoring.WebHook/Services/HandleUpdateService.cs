@@ -84,27 +84,30 @@ namespace NotSoBoring.WebHook.Services
         private async Task<(bool, UserState)> CheckUser(long userId)
         {
             // check if user is a member of our channel
-            string shouldJoinChannel = "You have to join our channel in order to use the bot \n\n"
+            if (!string.IsNullOrWhiteSpace(_botConfig.TelegramChannel))
+            {
+                string shouldJoinChannel = "You have to join our channel in order to use the bot \n\n"
                                      + $"Channel's ID: 👈 {_botConfig.TelegramChannel}";
 
-            try
-            {
-                var chatMember = await _botClient.GetChatMemberAsync(_botConfig.TelegramChannel, userId);
-                if (chatMember == null || chatMember.Status == ChatMemberStatus.Left 
-                    || chatMember.Status == ChatMemberStatus.Kicked || chatMember.Status == ChatMemberStatus.Restricted)
+                try
+                {
+                    var chatMember = await _botClient.GetChatMemberAsync(_botConfig.TelegramChannel, userId);
+                    if (chatMember == null || chatMember.Status == ChatMemberStatus.Left
+                        || chatMember.Status == ChatMemberStatus.Kicked || chatMember.Status == ChatMemberStatus.Restricted)
+                    {
+                        await _botClient.SendTextMessageAsync(chatId: userId,
+                                                              text: shouldJoinChannel);
+
+                        return (false, UserState.InMenu);
+                    }
+                }
+                catch
                 {
                     await _botClient.SendTextMessageAsync(chatId: userId,
-                                                          text: shouldJoinChannel);
+                                                              text: shouldJoinChannel);
 
                     return (false, UserState.InMenu);
                 }
-            }
-            catch
-            {
-                await _botClient.SendTextMessageAsync(chatId: userId,
-                                                          text: shouldJoinChannel);
-
-                return (false, UserState.InMenu);
             }
 
             // check if user exists
